@@ -1,0 +1,18 @@
+
+version: '3.8'
+services:
+  db:
+    image: postgres:16 # You can specify a version
+    container_name: behance_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: my_real_pass
+      POSTGRES_DB: behance_clone_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - behance_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  behance_postgres_data:

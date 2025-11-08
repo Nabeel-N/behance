@@ -1,43 +1,67 @@
 import express from 'express';
 import cors from 'cors';
 import * as bcrypt from 'bcrypt';
-import { prisma } from '@repo/db';
+import * as jwt from 'jsonwebtoken';
+import { prisma, User } from '@repo/db';
+
 const app = express();
 const port = 4000;
 
+const JWT_SECRET = process.env.JWT_SECRET || "YOUR_SUPER_SECRET_KEY";
+if (JWT_SECRET === "YOUR_SUPER_SECRET_KEY") {
+  console.warn("WARNING: Using default JWT_SECRET. Set a real secret in your .env file!");
+}
 
 app.use(cors());
 app.use(express.json());
 
-async function validatesignup(name: string, email: string, password: string): Promise<boolean | string> {
+async function validatesignup(name: string, email: string, password: string): Promise<User | null> {
   try {
     if (!password || !email) {
-      return false;
+      return null;
     }
-    async function Hahspassword() {
-      const hash = await bcrypt.hash(password, 10);
-      return hash;
-    }
-    const hashedpassword = await Hahspassword();
 
-    const createuser = await prisma.user.create({
+    const hashedpassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
       data: {
         name: name,
         email: email,
         password: hashedpassword,
       }
-    })
-    if (!createuser) {
-      return JSON.stringify({
-        message: "Signup db error"
-      })
-    }
+    });
+
+    return user;
+
   } catch (e) {
-    console.error(e + "this is a error from validatesignup")
+    console.error(e + " - this is an error from validatesignup");
+    return null;
   }
-  return true;
 }
 
+async function validatesignin(email: string, password: string): Promise<User | null> {
+  if (!email || !password) {
+    return null;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: email
+    }
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  const comparepassword = await bcrypt.compare(password, user.password);
+
+  if (!comparepassword) {
+    return null;
+  }
+
+  return user;
+}
 
 app.post('/api/signup', async (req, res) => {
   try {
@@ -45,76 +69,61 @@ app.post('/api/signup', async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    const signup = await validatesignup(name, email, password);
+    const user = await validatesignup(name, email, password);
 
-    if (!signup) {
+    if (!user) {
       return res.status(400).json({
-        message: "Password or email is not present",
+        message: "Signup failed. Email may already be in use or data is missing.",
       });
     }
     else {
-      console.log("Signup success:", { name, email });
+      console.log("Signup success:", { name, email, id: user.id });
       return res.status(200).json({
         message: "Signup successful",
       });
     }
   } catch (e) {
-    console.error(e + "error from the signup");
+    console.error(e + " - error from the signup route");
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 
-async function validatesignin(email: string, password: string): Promise<boolean | string> {
-  if (!email || !password) {
-    return false;
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      email: email
-    }
-  })
-  if (!user) {
-    return JSON.stringify({
-      message: "this email is not valid"
-    })
-  }
-  const comparepassword = await bcrypt.compare(password, user.password)
-  if (!comparepassword) {
-    return JSON.stringify({
-      message: "password is incorrect"
-    })
-  }
-  const signindb = await prisma.user.create({
-    data: {
-      email,
-      password
-    }
-  })
-  if (!signindb) {
-    return JSON.stringify({
-      message: "signin db error"
-    })
-  }
-  return true;
-
-}
 
 app.post('/api/signin', async (req, res) => {
-  const email = req.body.email
-  const password = req.body.password;
-  const signin = await validatesignin(email, password);
-  if (!signin) {
-    res.status(400).json({
-      message: "email or  password is not correct"
-    })
+  try {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    const user = await validatesignin(email, password);
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid email or password"
+      });
+    } else {
+      const payload = {
+        id: user.id,
+        email: user.email,
+      };
+
+      const token = jwt.sign(payload, JWT_SECRET, {
+        expiresIn: '1h'
+      });
+
+      return res.status(200).json({
+        message: "Sign in successful",
+        token: token
+      });
+    }
+  } catch (e) {
+    console.error(e + " - error from signin route");
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 
 app.post("/projects", async (req, res) => {
-
-})
-
-
+  // TODO: Protect this route with JWT
+});
 
 app.listen(port, () => {
   console.log(`🚀 http-backend listening at http://localhost:${port}`);

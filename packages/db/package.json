@@ -16,6 +16,7 @@
     "@prisma/client": "latest"
   },
   "devDependencies": {
+    "@repo/typescript-config": "workspace:^",
     "prisma": "latest"
   }
 }

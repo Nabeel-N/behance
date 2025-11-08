@@ -1,0 +1,15 @@
+{
+  "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "tailwind.config.js",
+    "postcss.config.js"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

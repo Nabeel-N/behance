@@ -3,6 +3,7 @@ import cors from 'cors';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { prisma, User } from '@repo/db';
+import { middleware } from './middleware';
 
 const app = express();
 const port = 4000;
@@ -121,8 +122,16 @@ app.post('/api/signin', async (req, res) => {
   }
 });
 
-app.post("/projects", async (req, res) => {
-  // TODO: Protect this route with JWT
+app.post("/projects", middleware, async (req, res) => {
+  const userId = req.user?.id
+  if (!userId) {
+    res.status(401).json({
+      message: "User is not verified"
+    })
+  }
+  const image = req.body.imageurl;
+  const title = req.body.title;
+
 });
 
 app.listen(port, () => {

@@ -132,7 +132,7 @@ app.post("/api/projects", middleware, async (req, res) => {
       message: "User is not verified"
     })
   }
-  const image = req.body.imageurl;
+  const image = req.body.image;
   const title = req.body.title;
 
   if (!image || !title) {
@@ -140,13 +140,51 @@ app.post("/api/projects", middleware, async (req, res) => {
       message: "image or title is misssing or invalid "
     });
   }
-  await prisma.project.create({
+  const newproject = await prisma.project.create({
     data: {
       image: image,
       title: title,
-      authorId: userId,
+      userId: userId,
     },
   })
+
+  res.status(201).json(newproject);
+  return res.status(500).json({
+    message: "An error occurred while creating the project."
+  });
+});
+
+app.get("/api/getprojects", async (req, res) => {
+  try {
+    const projects = await prisma.project.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+
+        _count: {
+          select: {
+            likes: true,
+            comments: true
+          },
+        }
+      }
+    })
+
+    return res.status(201).json(projects);
+  } catch (e) {
+    console.error("Error fetching projects:", e);
+    return res.status(500).json({
+      message: "Error fetching projects"
+    })
+  }
+
 });
 
 app.listen(port, () => {

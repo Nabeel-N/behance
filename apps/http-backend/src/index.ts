@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { prisma, User } from '@repo/db';
+import { prisma, Project, User } from '@repo/db';
 import { middleware } from './middleware';
 
 const app = express();
@@ -64,6 +64,7 @@ async function validatesignin(email: string, password: string): Promise<User | n
   return user;
 }
 
+
 app.post('/api/signup', async (req, res) => {
   try {
     const name = req.body?.name;
@@ -122,16 +123,30 @@ app.post('/api/signin', async (req, res) => {
   }
 });
 
-app.post("/projects", middleware, async (req, res) => {
+
+
+app.post("/api/projects", middleware, async (req, res) => {
   const userId = req.user?.id
   if (!userId) {
-    res.status(401).json({
+    return res.status(401).json({
       message: "User is not verified"
     })
   }
   const image = req.body.imageurl;
   const title = req.body.title;
 
+  if (!image || !title) {
+    return res.status(401).json({
+      message: "image or title is misssing or invalid "
+    });
+  }
+  await prisma.project.create({
+    data: {
+      image: image,
+      title: title,
+      authorId: userId,
+    },
+  })
 });
 
 app.listen(port, () => {

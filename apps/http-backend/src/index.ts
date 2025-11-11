@@ -10,7 +10,7 @@ const port = 4000;
 
 const JWT_SECRET = process.env.JWT_SECRET || "YOUR_SUPER_SECRET_KEY";
 if (JWT_SECRET === "YOUR_SUPER_SECRET_KEY") {
-  console.warn("WARNING: Using default JWT_SECRET. Set a real secret in your .env file!");
+  console.warn("WARNING: Using default JWT_SECRET. need set a real .env file!");
 }
 
 app.use(cors());
@@ -123,38 +123,42 @@ app.post('/api/signin', async (req, res) => {
   }
 });
 
-
-
 app.post("/api/projects", middleware, async (req, res) => {
-  const userId = req.user?.id
+  const userId = req.user?.id;
   if (!userId) {
     return res.status(401).json({
       message: "User is not verified"
-    })
+    });
   }
   const image = req.body.image;
   const title = req.body.title;
 
   if (!image || !title) {
-    return res.status(401).json({
-      message: "image or title is misssing or invalid "
+    return res.status(400).json({ // Use 400 for bad request
+      message: "image or title is missing or invalid "
     });
   }
-  const newproject = await prisma.project.create({
-    data: {
-      image: image,
-      title: title,
-      userId: userId,
-    },
-  })
 
-  res.status(201).json(newproject);
-  return res.status(500).json({
-    message: "An error occurred while creating the project."
-  });
+  try {
+    const newproject = await prisma.project.create({
+      data: {
+        image: image,
+        title: title,
+        userId: userId,
+      },
+    });
+
+    res.status(201).json(newproject);
+  } catch (e) {
+    console.error("Error creating project:", e);
+    return res.status(500).json({
+      message: "An error occurred while creating the project."
+    });
+  }
 });
 
-app.get("/api/getprojects", async (req, res) => {
+
+app.get("/api/getmyprojects", async (req, res) => {
   try {
     const projects = await prisma.project.findMany({
       orderBy: {
@@ -177,7 +181,7 @@ app.get("/api/getprojects", async (req, res) => {
       }
     })
 
-    return res.status(201).json(projects);
+    return res.status(200).json(projects);
   } catch (e) {
     console.error("Error fetching projects:", e);
     return res.status(500).json({

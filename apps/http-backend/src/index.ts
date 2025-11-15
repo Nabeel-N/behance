@@ -16,6 +16,7 @@ if (JWT_SECRET === "YOUR_SUPER_SECRET_KEY") {
 app.use(cors());
 app.use(express.json());
 
+
 async function validatesignup(name: string, email: string, password: string): Promise<User | null> {
   try {
     if (!password || !email) {
@@ -123,6 +124,7 @@ app.post('/api/signin', async (req, res) => {
   }
 });
 
+
 app.post("/api/projects", middleware, async (req, res) => {
   const userId = req.user?.id;
   if (!userId) {
@@ -134,7 +136,7 @@ app.post("/api/projects", middleware, async (req, res) => {
   const title = req.body.title;
 
   if (!image || !title) {
-    return res.status(400).json({ // Use 400 for bad request
+    return res.status(400).json({
       message: "image or title is missing or invalid "
     });
   }
@@ -157,7 +159,6 @@ app.post("/api/projects", middleware, async (req, res) => {
   }
 });
 
-
 app.get("/api/getmyprojects", async (req, res) => {
   try {
     const projects = await prisma.project.findMany({
@@ -171,7 +172,6 @@ app.get("/api/getmyprojects", async (req, res) => {
             name: true,
           }
         },
-
         _count: {
           select: {
             likes: true,
@@ -188,7 +188,6 @@ app.get("/api/getmyprojects", async (req, res) => {
       message: "Error fetching projects"
     })
   }
-
 });
 
 app.listen(port, () => {

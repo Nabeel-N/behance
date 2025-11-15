@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
+    "motion": "^12.23.24",
     "next": "^16.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.1.0"

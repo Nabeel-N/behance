@@ -110,7 +110,6 @@ app.post('/api/signin', async (req, res) => {
       };
 
       const token = jwt.sign(payload, JWT_SECRET, {
-        expiresIn: '1h'
       });
 
       return res.status(200).json({

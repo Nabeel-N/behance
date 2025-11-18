@@ -1,7 +1,6 @@
 "use client";
-import { motion } from "motion/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Ensure this is imported
+import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -28,51 +27,52 @@ export default function AuthPage() {
     setError("");
     setSuccess("");
 
-    if (isLoginView) {
-      try {
-        const response = await fetch("http://localhost:4000/api/signin", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
+    // Ensure this matches your backend URL
+    const API_BASE = "http://localhost:4000";
+    const endpoint = isLoginView
+      ? `${API_BASE}/api/signin`
+      : `${API_BASE}/api/signup`;
 
-        const data = await response.json();
+    const payload = isLoginView
+      ? { email, password }
+      : { name, email, password };
 
-        if (!response.ok) {
-          throw new Error(data.message || "Sign in failed");
-        }
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-        localStorage.setItem("token", data.token);
-        setSuccess("Sign in successful! Redirecting...");
-        router.push("/");
+      const data = await response.json();
 
-      } catch (err: any) {
-        setError(err.message);
+      console.log("Server Response:", data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Authentication failed");
       }
 
-    } else {
-      // --- SIGNUP LOGIC ---
-      try {
-        const response = await fetch("http://localhost:4000/api/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
-        });
+      if (isLoginView) {
+        if (data.token) {
+          // --- FIX: Saving with the correct key name 'bhance_token' ---
+          localStorage.setItem("bhance_token", data.token);
 
-        const data = await response.json();
+          setSuccess("Sign in successful! Redirecting...");
 
-        if (!response.ok) {
-          throw new Error(data.message || "Sign up failed");
+          // Redirect to home or create project page
+          setTimeout(() => router.push("/"), 500);
+        } else {
+          console.error("Login succeeded but no token found in:", data);
+          setError("Login error: Server did not return a token.");
         }
-
+      } else {
         setSuccess("Sign up successful! Please sign in.");
-
-        // 3. Switch view to 'Sign In' so user can log in immediately
         toggleView();
-
-      } catch (err: any) {
-        setError(err.message);
       }
+
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message);
     }
   };
 
@@ -86,96 +86,52 @@ export default function AuthPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLoginView && (
             <div>
-              <label
-                htmlFor="name"
-                className="text-sm font-medium text-gray-700"
-              >
-                Name
-              </label>
+              <label className="text-sm font-medium text-gray-700">Name</label>
               <input
-                id="name"
-                name="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
+                required={!isLoginView}
+                className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md text-black"
               />
             </div>
           )}
 
-          {/* Email Field */}
           <div>
-            <label
-              htmlFor="email"
-              className="text-sm font-medium text-gray-700"
-            >
-              Email address
-            </label>
+            <label className="text-sm font-medium text-gray-700">Email</label>
             <input
-              id="email"
-              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
               required
-              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md text-black"
             />
           </div>
 
-          {/* Password Field */}
           <div>
-            <label
-              htmlFor="password"
-              className="text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
+            <label className="text-sm font-medium text-gray-700">Password</label>
             <input
-              id="password"
-              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
               required
-              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
+              className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md text-black"
             />
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <p className="text-sm text-red-600 text-center">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+          {success && <p className="text-sm text-green-600 text-center">{success}</p>}
 
-          {/* Success Message */}
-          {success && (
-            <p className="text-sm text-green-600 text-center">
-              {success}
-            </p>
-          )}
-
-          {/* Submit Button */}
-          <div>
-            <button
-              type="submit"
-              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              {isLoginView ? "Sign In" : "Create Account"}
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full py-2 px-4 rounded-md text-white bg-blue-600 hover:bg-blue-700 font-bold"
+          >
+            {isLoginView ? "Sign In" : "Create Account"} </button>
         </form>
 
-        {/* Toggle Link */}
         <p className="text-sm text-center text-gray-600">
           {isLoginView ? "Don't have an account?" : "Already have an account?"}
-          <button
-            onClick={toggleView}
-            className="ml-1 font-medium text-blue-600 hover:text-blue-500"
-          >
+          <button onClick={toggleView} className="ml-1 font-medium text-blue-600 hover:text-blue-500">
             {isLoginView ? "Sign Up" : "Sign In"}
           </button>
         </p>

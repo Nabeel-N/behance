@@ -153,7 +153,7 @@ app.post("/api/projects", middleware, async (req, res) => {
       },
     });
 
-    res.status(201).json(newproject);
+    return res.status(201).json(newproject);
   } catch (e) {
     console.error("Error creating project:", e);
     return res.status(500).json({
@@ -161,7 +161,6 @@ app.post("/api/projects", middleware, async (req, res) => {
     });
   }
 });
-
 
 app.get("/api/projects", async (req, res) => {
   try {
@@ -194,7 +193,6 @@ app.get("/api/projects", async (req, res) => {
   }
 });
 
-
 app.get("/api/projects/:id", async (req, res) => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) {
@@ -219,7 +217,6 @@ app.get("/api/projects/:id", async (req, res) => {
   }
 });
 
-
 app.get("/api/projects/mine", middleware, async (req, res) => {
   const userId = (req as any).user?.id;
   if (!userId) {
@@ -242,7 +239,6 @@ app.get("/api/projects/mine", middleware, async (req, res) => {
     return res.status(500).json({ message: "Error fetching user projects" });
   }
 });
-
 
 app.put("/api/projects/:id", middleware, async (req, res) => {
   const userId = (req as any).user?.id;
@@ -288,7 +284,6 @@ app.put("/api/projects/:id", middleware, async (req, res) => {
     return res.status(500).json({ message: "Error updating project" });
   }
 });
-
 
 app.delete("/api/projects/:id", middleware, async (req, res) => {
   const userId = (req as any).user?.id;

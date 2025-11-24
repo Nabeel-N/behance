@@ -54,12 +54,11 @@ export default function AuthPage() {
 
       if (isLoginView) {
         if (data.token) {
-          // --- FIX: Saving with the correct key name 'bhance_token' ---
+          
           localStorage.setItem("bhance_token", data.token);
 
           setSuccess("Sign in successful! Redirecting...");
 
-          // Redirect to home or create project page
           setTimeout(() => router.push("/"), 500);
         } else {
           console.error("Login succeeded but no token found in:", data);

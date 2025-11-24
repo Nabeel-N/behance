@@ -15,7 +15,7 @@
     ".next/types/**/*.ts",
     "postcss.config.cjs",
     "tailwind.config.cjs"
-  ],
+, "../../packages/ui/src/Sidebar.tsx"  ],
   "exclude": [
     "node_modules"
   ]

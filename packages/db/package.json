@@ -8,15 +8,15 @@
   },
   "scripts": {
     "build": "prisma generate",
-    "dev": "prisma migrate dev",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push"
-  },
-  "dependencies": {
-    "@prisma/client": "latest"
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "dev": "prisma generate --watch"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:^",
-    "prisma": "latest"
+    "prisma": "^5.22.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
   }
 }

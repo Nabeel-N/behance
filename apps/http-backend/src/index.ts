@@ -146,6 +146,7 @@ app.post("/api/projects", middleware, async (req, res) => {
         image: image,
         title: title,
         userId: userId,
+        published: true,
       },
     });
 

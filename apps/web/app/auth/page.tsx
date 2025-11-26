@@ -53,8 +53,7 @@ export default function AuthPage() {
 
       if (isLoginView) {
         if (data.token) {
-          localStorage.setItem("token", data.token);
-
+          localStorage.setItem("Bearer", data.token);
           setSuccess("Sign in successful! Redirecting...");
 
           setTimeout(() => router.push("/"), 500);

@@ -21,23 +21,27 @@ export default function App() {
   const [plusiconModal, SetPlusIonModal] = useState<boolean>(false);
   const [projects, setProjects] = useState<Project[]>([]);
 
-  useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const response = await fetch("http://localhost:4000/api/projects");
-        if (response.ok) {
-          const data = await response.json();
-          setProjects(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
+  async function fetchProjects() {
+    try {
+      const response = await fetch("http://localhost:4000/api/projects");
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data);
       }
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
     }
+  }
+
+  useEffect(() => {
     fetchProjects();
   }, []);
 
+  
+
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-black">
       {/* 1. Sidebar */}
       <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} />
       {plusiconModal && <PinModal />}
@@ -81,7 +85,7 @@ export default function App() {
                         ? project.user.name[0].toUpperCase()
                         : "U"}
                     </div>
-                    <p className="text-xs p-1.5 bg-blue-200 rounded-full text-gray-500 truncate max-w-[100px]">
+                    <p className="text-xs px-1.5 py-0.2 bg-gradient-to-tl from-stone-400 to-neutral-100 rounded-md   text-gray-500 truncate max-w-[100px]">
                       {project.user.name || "User"}
                     </p>
                   </div>

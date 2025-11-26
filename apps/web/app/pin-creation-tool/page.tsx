@@ -47,8 +47,10 @@ export default function PinCreationTool() {
       alert("Something went wrong. Is the backend running on port 4000?");
     }
   }
+  
 
   return (
+    
     <div className="flex min-h-screen bg-white ">
       {/* Sidebar */}
       {/* Main Content */}
@@ -56,6 +58,7 @@ export default function PinCreationTool() {
         {/* Top Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 md:border-none">
           <h1 className="text-xl font-bold text-gray-900">Create Pin</h1>
+          
           <button
             onClick={handlePublish}
             className="bg-red-600 text-white font-bold py-3 px-6 rounded-full hover:bg-red-700 transition"
@@ -175,6 +178,6 @@ export default function PinCreationTool() {
           </div>
         </div>
       </main>
-    </div>
+  </div>
   );
 }

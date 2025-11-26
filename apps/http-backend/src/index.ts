@@ -125,9 +125,6 @@ app.post("/api/signin", async (req, res) => {
   }
 });
 
-/**
- * Create project (protected)
- */
 app.post("/api/projects", middleware, async (req, res) => {
   const userId = (req as any).user?.id;
   if (!userId) {
@@ -143,7 +140,6 @@ app.post("/api/projects", middleware, async (req, res) => {
       message: "image or title is missing or invalid ",
     });
   }
-
   try {
     const newproject = await prisma.project.create({
       data: {
@@ -193,6 +189,29 @@ app.get("/api/projects", async (req, res) => {
   }
 });
 
+app.get("/api/projects/mine", middleware, async (req, res) => {
+  const userId = (req as any).user?.id;
+  if (!userId) {
+    return res.status(401).json({ message: "User is not verified" });
+  }
+
+  try {
+    const projects = await prisma.project.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: { select: { id: true, name: true } },
+        _count: { select: { likes: true, comments: true } },
+      },
+    });
+
+    return res.status(200).json(projects);
+  } catch (e) {
+    console.error("Error fetching user projects:", e);
+    return res.status(500).json({ message: "Error fetching user projects" });
+  }
+});
+
 app.get("/api/projects/:id", async (req, res) => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) {
@@ -214,29 +233,6 @@ app.get("/api/projects/:id", async (req, res) => {
   } catch (e) {
     console.error("Error fetching project:", e);
     return res.status(500).json({ message: "Error fetching project" });
-  }
-});
-
-app.get("/api/projects/mine", middleware, async (req, res) => {
-  const userId = (req as any).user?.id;
-  if (!userId) {
-    return res.status(401).json({ message: "User is not verified" });
-  }
-
-  try {
-    const projects = await prisma.project.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      include: {
-        user: { select: { id: true, name: true } },
-        _count: { select: { likes: true, comments: true } },
-      },
-    });
-
-    return res.status(200).json(projects);
-  } catch (e) {
-    console.error("Error fetching user projects:", e);
-    return res.status(500).json({ message: "Error fetching user projects" });
   }
 });
 

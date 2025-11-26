@@ -1,4 +1,4 @@
-// packages/ui/src/Editicon.tsx
+"use client";
 
 export default function EditIcon({
   onClick,

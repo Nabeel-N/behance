@@ -27,7 +27,6 @@ export default function AuthPage() {
     setError("");
     setSuccess("");
 
-    // Ensure this matches your backend URL
     const API_BASE = "http://localhost:4000";
     const endpoint = isLoginView
       ? `${API_BASE}/api/signin`
@@ -54,8 +53,7 @@ export default function AuthPage() {
 
       if (isLoginView) {
         if (data.token) {
-          
-          localStorage.setItem("bhance_token", data.token);
+          localStorage.setItem("token", data.token);
 
           setSuccess("Sign in successful! Redirecting...");
 
@@ -68,7 +66,6 @@ export default function AuthPage() {
         setSuccess("Sign up successful! Please sign in.");
         toggleView();
       }
-
     } catch (err: any) {
       console.error(err);
       setError(err.message);
@@ -108,7 +105,9 @@ export default function AuthPage() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Password</label>
+            <label className="text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               type="password"
               value={password}
@@ -119,18 +118,24 @@ export default function AuthPage() {
           </div>
 
           {error && <p className="text-sm text-red-600 text-center">{error}</p>}
-          {success && <p className="text-sm text-green-600 text-center">{success}</p>}
+          {success && (
+            <p className="text-sm text-green-600 text-center">{success}</p>
+          )}
 
           <button
             type="submit"
             className="w-full py-2 px-4 rounded-md text-white bg-blue-600 hover:bg-blue-700 font-bold"
           >
-            {isLoginView ? "Sign In" : "Create Account"} </button>
+            {isLoginView ? "Sign In" : "Create Account"}{" "}
+          </button>
         </form>
 
         <p className="text-sm text-center text-gray-600">
           {isLoginView ? "Don't have an account?" : "Already have an account?"}
-          <button onClick={toggleView} className="ml-1 font-medium text-blue-600 hover:text-blue-500">
+          <button
+            onClick={toggleView}
+            className="ml-1 font-medium text-blue-600 hover:text-blue-500"
+          >
             {isLoginView ? "Sign Up" : "Sign In"}
           </button>
         </p>

@@ -65,7 +65,6 @@ export default function ProfilePage() {
       </span>
 
       <main className="flex-1 ml-0 md:ml-24 p-6">
-        {/* --- PROFILE HEADER SECTION --- */}
         <div className="flex flex-col items-center justify-center mb-12 mt-8">
           <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-4xl font-bold text-gray-500 mb-4 border-2 border-white shadow-sm">
             {loading ? "..." : userInitial}
@@ -89,7 +88,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* --- TABS (Created / Saved) --- */}
         <div className="flex justify-center gap-8 mb-8 border-b border-transparent">
           <button className="font-bold border-b-4 border-black pb-2">
             Created
@@ -99,7 +97,6 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* --- MASONRY GRID (Your Images) --- */}
         {loading ? (
           <p className="text-center mt-10">Loading...</p>
         ) : projects.length === 0 ? (

@@ -310,6 +310,47 @@ app.delete("/api/projects/:id", middleware, async (req, res) => {
   }
 });
 
+app.post("/api/uploadimage", async (req, res) => {
+  const userId = (req as any).user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ message: "User is not verified" });
+  }
+
+  const profilePhoto = req.body?.profilePhoto;
+
+  if (!profilePhoto) {
+    return res.status(400).json({
+      message: "Profile photo not provided",
+    });
+  }
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        profilePhoto: profilePhoto,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Profile photo uploaded successfully",
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        profilePhoto: updatedUser.profilePhoto,
+      },
+    });
+  } catch (error) {
+    console.error("Error uploading profile photo:", error);
+    return res.status(500).json({
+      message: "Failed to upload profile photo",
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log(`🚀 http-backend listening at http://localhost:${port}`);
 });

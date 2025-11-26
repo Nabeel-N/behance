@@ -13,6 +13,7 @@ model User {
   name     String?
   email    String    @unique
   password String
+  profilePhoto String?
   projects Project[]
   likes    Like[]
   comments Comment[]
@@ -56,3 +57,5 @@ model Comment {
   @@index([userId])
   @@index([projectId])
 }
+
+

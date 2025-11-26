@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import PreviousIcon from "@repo/ui/PreviousIcon";
+import Photo from "@repo/ui/Photo";
 
 interface Project {
   id: number;
@@ -58,6 +59,10 @@ export default function ProfilePage() {
   const userName = projects.length > 0 ? projects[0].user.name : "Me";
   const userInitial = userName ? userName[0].toUpperCase() : "M";
 
+  async function updataProfile() {
+    
+  }
+
   return (
     <div className="flex min-h-screen bg-white">
       <span className="mt-8 ml-8">
@@ -66,8 +71,13 @@ export default function ProfilePage() {
 
       <main className="flex-1 ml-0 md:ml-24 p-6">
         <div className="flex flex-col items-center justify-center mb-12 mt-8">
-          <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-4xl font-bold text-gray-500 mb-4 border-2 border-white shadow-sm">
-            {loading ? "..." : userInitial}
+          <div
+            onClick={() => updataProfile}
+            className="w-32 h-32 rounded-full  bg-gray-200 flex items-center justify-center text-4xl font-bold text-gray-500 mb-4 border-2 border-white shadow-sm"
+          >
+            <span>
+              <Photo />
+            </span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">{userName}</h1>
           <p className="text-gray-500 mt-2">

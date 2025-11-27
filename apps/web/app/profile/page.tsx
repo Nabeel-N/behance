@@ -177,7 +177,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex justify-center gap-8 mb-8 border-b border-transparent">
-          <button className="font-bold border-b-4 border-black pb-2">
+          <button className="font-bold border-b-4   border-black pb-2">
             Created
           </button>
           <button className="font-bold text-gray-500 pb-2 hover:text-black transition">

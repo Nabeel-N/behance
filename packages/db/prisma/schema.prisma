@@ -15,6 +15,7 @@ model User {
   password String
   profilePhoto String?
   projects Project[]
+  savedprojects Project[] @relation("savedprojects")
   likes    Like[]
   comments Comment[]
 }
@@ -28,6 +29,7 @@ model Project {
   description String?
   userId    Int
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  savedby   User[] @relation("savedprojects")
   likes     Like[]
   comments  Comment[]
   views     Int       @default(0)

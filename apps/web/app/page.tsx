@@ -1,7 +1,7 @@
 "use client";
 import Sidebar from "@repo/ui/Sidebar";
 import PinModal from "@repo/ui/PinModal";
-import { useState, useEffect } from "react";
+import { useState, useEffect, MouseEventHandler } from "react";
 
 interface Project {
   id: number;
@@ -10,6 +10,7 @@ interface Project {
   user?: {
     id: number;
     name: string | null;
+    profilePhoto?: String;
   };
   _count: {
     likes: number;
@@ -69,6 +70,36 @@ export default function App() {
     return () => document.removeEventListener("keydown", handleEscapeKey);
   }, [imageModal]);
 
+  async function handleSaveProject(e: React.MouseEvent, projectId: number) {
+    e.stopPropagation();
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login first");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/projects/${projectId}/save`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.message);
+      }
+    } catch (error) {
+      console.error("Error saving project:", error);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black">
       <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} />
@@ -123,10 +154,7 @@ export default function App() {
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <button
                     className="bg-red-600 text-white font-bold px-4 py-2 rounded-full text-sm hover:bg-red-700 shadow-md"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      alert("Saved!");
-                    }}
+                    onClick={(e) => handleSaveProject(e, project.id)}
                   >
                     Save
                   </button>

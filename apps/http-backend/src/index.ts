@@ -384,6 +384,57 @@ app.get("/api/me", middleware, async (req, res) => {
   }
 });
 
+app.post("/api/projects/:id/save", middleware, async (req, res) => {
+  const userId = (req as any).user?.id;
+  if (!userId) {
+    return res.status(401).json({ message: "User is not verified" });
+  }
+
+  const projectId = parseInt(req.params.id!);
+  if (isNaN(projectId)) {
+    return res.status(400).json({ message: "Invalid Project ID" });
+  }
+
+  try {
+    const existingSave = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        savedby: {
+          some: { id: userId },
+        },
+      },
+    });
+
+    if (existingSave) {
+      await prisma.project.update({
+        where: { id: projectId },
+        data: {
+          savedby: {
+            disconnect: { id: userId },
+          },
+        },
+      });
+      return res.json({
+        message: "Project removed from saved",
+        isSaved: false,
+      });
+    } else {
+      await prisma.project.update({
+        where: { id: projectId },
+        data: {
+          savedby: {
+            connect: { id: userId },
+          },
+        },
+      });
+      return res.json({ message: "Project saved successfully", isSaved: true });
+    }
+  } catch (error) {
+    console.error("Save toggle error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`🚀 http-backend listening at http://localhost:${port}`);
 });

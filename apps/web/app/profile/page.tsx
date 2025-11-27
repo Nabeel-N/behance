@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import PreviousIcon from "@repo/ui/PreviousIcon";
 import Photo from "@repo/ui/Photo";
 import Sidebar from "@repo/ui/Sidebar";
 
@@ -36,6 +35,19 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [plusiconModal, SetPlusIonModal] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"created" | "saved">("created");
+
+  // Modal State
+  const [editModal, SetEditModal] = useState<boolean>(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+
+  // Sync edit state when user loads
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name || "");
+      setEditEmail(user.email || "");
+    }
+  }, [user]);
 
   async function fetchMyProjects() {
     const token = localStorage.getItem("token");
@@ -146,8 +158,39 @@ export default function ProfilePage() {
     });
   }, []);
 
-  async function editprofile(){
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault(); 
+    const token = localStorage.getItem("token");
 
+    try {
+      const response = await fetch("http://localhost:4000/api/editprofile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: editName,
+          email: editEmail,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        // Update local state immediately so UI changes
+        setUser((prev) =>
+          prev
+            ? { ...prev, name: updatedUser.name, email: updatedUser.email }
+            : null
+        );
+        SetEditModal(false); // Close modal
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   }
 
   const projectsToDisplay = activeTab === "created" ? projects : savedproject;
@@ -155,7 +198,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex min-h-screen bg-white">
-      <main className="flex-1 ml-0 md:ml-24 p-6">
+      <main className="flex-1 ml-0 md:ml-24 p-6 relative">
         <div className="flex flex-col items-center justify-center mb-12 mt-8">
           <Sidebar
             openvariable={plusiconModal}
@@ -199,11 +242,76 @@ export default function ProfilePage() {
             <button className="bg-gray-200 px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition">
               Share
             </button>
-            <button onClick={editprofile} className="bg-gray-200 px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition">
+            <button
+              onClick={() => {
+                if (user) {
+                  setEditName(user.name || "");
+                  setEditEmail(user.email || "");
+                }
+                SetEditModal(true);
+              }}
+              className="bg-gray-200 px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition"
+            >
               Edit Profile
             </button>
           </div>
         </div>
+
+        {/* ----------------- EDIT MODAL ----------------- */}
+        {editModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200">
+              <h2 className="text-2xl font-bold mb-6 text-center">
+                Edit Profile
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    placeholder="Your name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    placeholder="Your email"
+                  />
+                </div>
+
+                <div className="flex gap-3 mt-8">
+                  <button
+                    type="button"
+                    onClick={() => SetEditModal(false)}
+                    className="flex-1 px-4 py-3 rounded-full font-bold bg-gray-100 hover:bg-gray-200 transition text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-3 rounded-full font-bold bg-black text-white hover:bg-gray-800 transition"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        {/* ----------------------------------------------- */}
 
         {/* Tab Buttons */}
         <div className="flex justify-center gap-8 mb-8 border-b border-transparent">
@@ -246,7 +354,6 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4 mx-auto max-w-[1600px]">
-            {/* Loop through projectsToDisplay (swaps automatically) */}
             {projectsToDisplay.map((project) => (
               <div
                 key={project.id}

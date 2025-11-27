@@ -8,6 +8,9 @@ import { middleware } from "./middleware";
 const app = express();
 const port = 4000;
 
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
 const JWT_SECRET = process.env.JWT_SECRET || "YOUR_SUPER_SECRET_KEY";
 if (JWT_SECRET === "YOUR_SUPER_SECRET_KEY") {
   console.warn("WARNING: Using default JWT_SECRET. need set a real .env file!");
@@ -134,6 +137,7 @@ app.post("/api/projects", middleware, async (req, res) => {
   }
   const image = req.body.image;
   const title = req.body.title;
+  const description = req.body?.description;
 
   if (!image || !title) {
     return res.status(400).json({
@@ -147,6 +151,7 @@ app.post("/api/projects", middleware, async (req, res) => {
         title: title,
         userId: userId,
         published: true,
+        description: description,
       },
     });
 
@@ -310,7 +315,7 @@ app.delete("/api/projects/:id", middleware, async (req, res) => {
   }
 });
 
-app.post("/api/uploadimage", async (req, res) => {
+app.post("/api/uploadimage", middleware, async (req, res) => {
   const userId = (req as any).user?.id;
 
   if (!userId) {
@@ -348,6 +353,34 @@ app.post("/api/uploadimage", async (req, res) => {
     return res.status(500).json({
       message: "Failed to upload profile photo",
     });
+  }
+});
+
+app.get("/api/me", middleware, async (req, res) => {
+  const userId = (req as any).user?.id;
+  if (!userId) {
+    return res.status(401).json({ message: "User is not verified" });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePhoto: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json(user);
+  } catch (e) {
+    console.error("Error fetching user details:", e);
+    return res.status(500).json({ message: "Error fetching user details" });
   }
 });
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import PreviousIcon from "@repo/ui/PreviousIcon";
 import Photo from "@repo/ui/Photo";
+import Sidebar from "@repo/ui/Sidebar";
 
 interface Project {
   id: number;
@@ -19,10 +20,19 @@ interface Project {
   };
 }
 
+interface User {
+  id: number;
+  name: string | null;
+  email: string;
+  profilePhoto: string | null;
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [plusiconModal, SetPlusIonModal] = useState<boolean>(false);
 
   async function fetchMyProjects() {
     const token = localStorage.getItem("token");
@@ -44,40 +54,108 @@ export default function ProfilePage() {
         const data = await response.json();
         setProjects(data);
       } else {
-        console.error("Failed to fetch profile");
+        console.error("Failed to fetch projects");
       }
     } catch (error) {
       console.error("Error:", error);
-    } finally {
-      setLoading(false);
     }
   }
+
+  async function fetchUserProfile() {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const response = await fetch("http://localhost:4000/api/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  }
+
   useEffect(() => {
-    fetchMyProjects();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/auth");
+      return;
+    }
+
+    Promise.all([fetchMyProjects(), fetchUserProfile()]).finally(() => {
+      setLoading(false);
+    });
   }, []);
 
-  const userName = projects.length > 0 ? projects[0].user.name : "Me";
-  const userInitial = userName ? userName[0].toUpperCase() : "M";
+  const userName = user?.name || "Me";
 
-  async function updataProfile() {
-    
+  async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      const token = localStorage.getItem("token");
+
+      try {
+        const response = await fetch("http://localhost:4000/api/uploadimage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ profilePhoto: base64String }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUser((prev) =>
+            prev ? { ...prev, profilePhoto: data.user.profilePhoto } : null
+          );
+        }
+      } catch (e) {
+        console.error("Error uploading profile photo:", e);
+      }
+    };
+    reader.readAsDataURL(file);
   }
 
   return (
     <div className="flex min-h-screen bg-white">
-      <span className="mt-8 ml-8">
-        <PreviousIcon />
-      </span>
-
       <main className="flex-1 ml-0 md:ml-24 p-6">
         <div className="flex flex-col items-center justify-center mb-12 mt-8">
-          <div
-            onClick={() => updataProfile}
-            className="w-32 h-32 rounded-full  bg-gray-200 flex items-center justify-center text-4xl font-bold text-gray-500 mb-4 border-2 border-white shadow-sm"
-          >
-            <span>
-              <Photo />
-            </span>
+          <Sidebar
+            openvariable={plusiconModal}
+            funOpenmodal={SetPlusIonModal}
+          />
+
+          <div className="relative group">
+            <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-4xl font-bold text-gray-500 mb-4 border-2 border-white shadow-sm overflow-hidden">
+              {user?.profilePhoto ? (
+                <img
+                  src={user.profilePhoto}
+                  alt={userName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Photo />
+              )}
+            </div>
+            <label className="absolute bottom-4 right-0 bg-white p-2 rounded-full shadow-md cursor-pointer hover:bg-gray-50 transition-colors">
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleImageUpload}
+              />
+              ✏️
+            </label>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">{userName}</h1>
           <p className="text-gray-500 mt-2">

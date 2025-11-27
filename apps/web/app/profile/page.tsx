@@ -146,6 +146,10 @@ export default function ProfilePage() {
     });
   }, []);
 
+  async function editprofile(){
+
+  }
+
   const projectsToDisplay = activeTab === "created" ? projects : savedproject;
   const userName = user?.name || "Me";
 
@@ -195,7 +199,7 @@ export default function ProfilePage() {
             <button className="bg-gray-200 px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition">
               Share
             </button>
-            <button className="bg-gray-200 px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition">
+            <button onClick={editprofile} className="bg-gray-200 px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition">
               Edit Profile
             </button>
           </div>

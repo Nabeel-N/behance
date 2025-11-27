@@ -430,6 +430,46 @@ app.get("/api/me", middleware, async (req, res) => {
   }
 });
 
+app.put("/api/editprofile", middleware, async (req, res) => {
+  const userId = (req as any).user?.id;
+  if (!userId) {
+    return res.status(401).json({ message: "User is not verified" });
+  }
+  try {
+    const name = req.body?.name;
+    const email = req.body.email;
+    const profilePhoto = req.body.profilePhoto;
+
+    if (!name && !email && !profilePhoto) {
+      return res.status(400).json({ message: "No data provided to update" });
+    }
+
+    const updatedprofile = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        name: name,
+        email: email,
+        profilePhoto: profilePhoto,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePhoto: true,
+      },
+    });
+    return res.status(201).json(updatedprofile);
+  } catch (e: any) {
+    if (e.code === "P2002") {
+      return res.status(409).json({ message: "This email is already in use" });
+    }
+    console.error("Error in editprofile:", e);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 app.post("/api/projects/:id/save", middleware, async (req, res) => {
   const userId = (req as any).user?.id;
   if (!userId) {

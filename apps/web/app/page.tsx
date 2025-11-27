@@ -71,6 +71,7 @@ export default function App() {
   }, [imageModal]);
 
   async function handleSaveProject(e: React.MouseEvent, projectId: number) {
+    console.log("clicked");
     e.stopPropagation();
 
     const token = localStorage.getItem("token");

@@ -217,7 +217,53 @@ app.get("/api/projects/mine", middleware, async (req, res) => {
     return res.status(500).json({ message: "Error fetching user projects" });
   }
 });
+app.get("/api/projects/saved", middleware, async (req, res) => {
+  const userId = (req as any).user?.id;
 
+  if (!userId) {
+    return res.status(401).json({ message: "User is not verified" });
+  }
+
+  try {
+    // 1. Find the User
+    const userWithSavedProjects = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      // 2. Include the 'savedprojects' relation
+      include: {
+        savedprojects: {
+          // 3. Inside the saved projects, include details needed for the UI card
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profilePhoto: true,
+              },
+            },
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!userWithSavedProjects) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 4. Return ONLY the array of projects
+    res.json(userWithSavedProjects.savedprojects);
+  } catch (error) {
+    console.error("Error fetching saved projects:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 app.get("/api/projects/:id", async (req, res) => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) {

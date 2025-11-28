@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Photo from "@repo/ui/Photo";
 import Sidebar from "@repo/ui/Sidebar";
+import DeleteIcon from "@repo/ui/DeleteIcon";
 
 interface Project {
   id: number;
@@ -36,12 +37,15 @@ export default function ProfilePage() {
   const [plusiconModal, SetPlusIonModal] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"created" | "saved">("created");
 
-  // Modal State
   const [editModal, SetEditModal] = useState<boolean>(false);
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
 
-  // Sync edit state when user loads
+  //CreateEditTag
+  const [CreateEditTagModal, SetCreateEditTag] = useState<boolean>(false);
+  const [editTitle, SetEditTitle] = useState<string | null>(null);
+  const [imageedit, SetImageEdit] = useState<string | null>(null);
+
   useEffect(() => {
     if (user) {
       setEditName(user.name || "");
@@ -159,7 +163,7 @@ export default function ProfilePage() {
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault(); 
+    e.preventDefault();
     const token = localStorage.getItem("token");
 
     try {
@@ -177,19 +181,54 @@ export default function ProfilePage() {
 
       if (response.ok) {
         const updatedUser = await response.json();
-        // Update local state immediately so UI changes
         setUser((prev) =>
           prev
             ? { ...prev, name: updatedUser.name, email: updatedUser.email }
             : null
         );
-        SetEditModal(false); // Close modal
+        SetEditModal(false);
       } else {
         const errorData = await response.json();
         alert(errorData.message || "Failed to update profile");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
+    }
+  }
+
+  async function DeleteProject(project: Project) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to delete.");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to delete this project?")) return;
+
+    try {
+      const response = await fetch(
+        "http://localhost:4000/api/projects/" + project.id,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setProjects((prevProjects) =>
+          prevProjects.filter((p) => p.id !== project.id)
+        );
+
+        console.log("Project deleted successfully");
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || "Failed to delete project");
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error);
     }
   }
 
@@ -359,6 +398,7 @@ export default function ProfilePage() {
                 key={project.id}
                 className="break-inside-avoid relative group cursor-zoom-in"
               >
+                <DeleteIcon onClick={() => DeleteProject(project)} />
                 <div className="rounded-2xl overflow-hidden mb-2 relative">
                   <img
                     src={project.image}
@@ -371,7 +411,16 @@ export default function ProfilePage() {
                   />
 
                   {activeTab === "created" && (
-                    <button className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Stop clicking the card itself
+                        // 👇 NAVIGATE WITH ID
+                        router.push(
+                          `/pin-creation-tool?mode=edit&projectId=${project.id}`
+                        );
+                      }}
+                      className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
                       ✏️
                     </button>
                   )}

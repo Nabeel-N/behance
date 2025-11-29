@@ -28,7 +28,7 @@ model Project {
   title     String
   description String?
   userId    Int
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   savedby   User[] @relation("savedprojects")
   likes     Like[]
   comments  Comment[]

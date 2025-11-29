@@ -2,6 +2,8 @@
 import Sidebar from "@repo/ui/Sidebar";
 import PinModal from "@repo/ui/PinModal";
 import { useState, useEffect, MouseEventHandler } from "react";
+import Likeicon from "@repo/ui/Likeicon";
+import { li } from "framer-motion/client";
 
 interface Project {
   id: number;
@@ -26,8 +28,15 @@ export default function App() {
   const [selectedImage, setSelectedImage] = useState<string>("");
 
   async function fetchProjects() {
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:4000/api/projects");
+      const response = await fetch("http://localhost:4000/api/projects", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         setProjects(data);
@@ -71,9 +80,8 @@ export default function App() {
   }, [imageModal]);
 
   async function handleSaveProject(e: React.MouseEvent, projectId: number) {
-    console.log("clicked");
     e.stopPropagation();
-
+    alert("saved to your profile save section");
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Please login first");
@@ -101,12 +109,54 @@ export default function App() {
     }
   }
 
+  async function handleLike(e: React.MouseEvent, projectId: number) {
+    e.stopPropagation();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login first");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/projects/${projectId}/like`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const isLikedNow = data.liked;
+
+        setProjects((prevProjects) =>
+          prevProjects.map((p) => {
+            if (p.id === projectId) {
+              return {
+                ...p,
+                _count: {
+                  ...p._count,
+                  likes: isLikedNow ? p._count.likes + 1 : p._count.likes - 1,
+                },
+              };
+            }
+            return p;
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error liking project:", error);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black">
       <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} />
 
       {plusiconModal && <PinModal />}
-
       {imageModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
@@ -118,6 +168,7 @@ export default function App() {
             className="max-h-[90vh] max-w-full rounded-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
+
           <button
             className="absolute top-5 right-5 text-white text-4xl font-bold hover:text-gray-300 transition-colors"
             onClick={() => SetimageModal(false)}
@@ -162,6 +213,10 @@ export default function App() {
                 </div>
 
                 <div className="px-1 mb-4">
+                  <Likeicon
+                    onClick={(e) => handleLike(e, project.id)}
+                    liked={false}
+                  />
                   <h3 className="font-bold text-gray-200 text-sm truncate leading-tight">
                     {project.title}
                   </h3>

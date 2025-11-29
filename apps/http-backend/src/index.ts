@@ -165,33 +165,44 @@ app.post("/api/projects", middleware, async (req, res) => {
 });
 
 app.get("/api/projects", async (req, res) => {
+  let currentUserId = null;
+  const authHeader = req.headers.authorization;
+
+  if (authHeader) {
+    try {
+      const token = authHeader.split(" ")[1];
+
+      if (token) {
+        const decoded = jwt.verify(token, JWT_SECRET) as unknown as {
+          id: number;
+        };
+        currentUserId = decoded.id;
+      }
+    } catch (e) {}
+  }
+
   try {
     const projects = await prisma.project.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-            comments: true,
-          },
+        user: { select: { id: true, name: true } },
+        _count: { select: { likes: true, comments: true } },
+        likes: {
+          where: { userId: currentUserId || -1 },
+          select: { userId: true },
         },
       },
     });
 
-    return res.status(200).json(projects);
+    const projectsWithLikeStatus = projects.map((project) => ({
+      ...project,
+      isLiked: project.likes.length > 0,
+    }));
+
+    return res.status(200).json(projectsWithLikeStatus);
   } catch (e) {
     console.error("Error fetching projects:", e);
-    return res.status(500).json({
-      message: "Error fetching projects",
-    });
+    return res.status(500).json({ message: "Error fetching projects" });
   }
 });
 
@@ -225,15 +236,12 @@ app.get("/api/projects/saved", middleware, async (req, res) => {
   }
 
   try {
-    // 1. Find the User
     const userWithSavedProjects = await prisma.user.findUnique({
       where: {
         id: userId,
       },
-      // 2. Include the 'savedprojects' relation
       include: {
         savedprojects: {
-          // 3. Inside the saved projects, include details needed for the UI card
           include: {
             user: {
               select: {
@@ -256,8 +264,6 @@ app.get("/api/projects/saved", middleware, async (req, res) => {
     if (!userWithSavedProjects) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    // 4. Return ONLY the array of projects
     res.json(userWithSavedProjects.savedprojects);
   } catch (error) {
     console.error("Error fetching saved projects:", error);
@@ -361,6 +367,47 @@ app.delete("/api/projects/:id", middleware, async (req, res) => {
   }
 });
 
+app.post("/api/projects/:id/like", middleware, async (req, res) => {
+  const userId = (req as any).user?.id;
+  const projectId = parseInt(req.params.id!);
+
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
+  if (isNaN(projectId)) return res.status(400).json({ message: "Invalid ID" });
+
+  try {
+    const existingLike = await prisma.like.findUnique({
+      where: {
+        userId_projectId: {
+          userId: userId,
+          projectId: projectId,
+        },
+      },
+    });
+
+    if (existingLike) {
+      await prisma.like.delete({
+        where: {
+          userId_projectId: {
+            userId: userId,
+            projectId: projectId,
+          },
+        },
+      });
+      return res.json({ liked: false, message: "Unliked" });
+    } else {
+      await prisma.like.create({
+        data: {
+          userId: userId,
+          projectId: projectId,
+        },
+      });
+      return res.json({ liked: true, message: "Liked" });
+    }
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
 app.post("/api/uploadimage", middleware, async (req, res) => {
   const userId = (req as any).user?.id;
 
@@ -520,7 +567,6 @@ app.post("/api/projects/:id/save", middleware, async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 app.listen(port, () => {
   console.log(`🚀 http-backend listening at http://localhost:${port}`);

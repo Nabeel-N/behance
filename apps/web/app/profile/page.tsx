@@ -41,10 +41,7 @@ export default function ProfilePage() {
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
 
-  //CreateEditTag
-  const [CreateEditTagModal, SetCreateEditTag] = useState<boolean>(false);
-  const [editTitle, SetEditTitle] = useState<string | null>(null);
-  const [imageedit, SetImageEdit] = useState<string | null>(null);
+  const [shareModal, SetShareModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
@@ -53,23 +50,15 @@ export default function ProfilePage() {
     }
   }, [user]);
 
+  // --- API CALLS ---
   async function fetchMyProjects() {
     const token = localStorage.getItem("token");
     if (!token) return;
-
     try {
       const response = await fetch("http://localhost:4000/api/projects/mine", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setProjects(data);
-      }
+      if (response.ok) setProjects(await response.json());
     } catch (error) {
       console.error("Error fetching created projects:", error);
     }
@@ -78,20 +67,11 @@ export default function ProfilePage() {
   async function fetchSavedProjects() {
     const token = localStorage.getItem("token");
     if (!token) return;
-
     try {
       const response = await fetch("http://localhost:4000/api/projects/saved", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSavedProjects(data);
-      }
+      if (response.ok) setSavedProjects(await response.json());
     } catch (error) {
       console.error("Error fetching saved projects:", error);
     }
@@ -100,15 +80,11 @@ export default function ProfilePage() {
   async function fetchUserProfile() {
     const token = localStorage.getItem("token");
     if (!token) return;
-
     try {
       const response = await fetch("http://localhost:4000/api/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data);
-      }
+      if (response.ok) setUser(await response.json());
     } catch (error) {
       console.error("Error fetching user profile:", error);
     }
@@ -117,12 +93,10 @@ export default function ProfilePage() {
   async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onloadend = async () => {
       const base64String = reader.result as string;
       const token = localStorage.getItem("token");
-
       try {
         const response = await fetch("http://localhost:4000/api/uploadimage", {
           method: "POST",
@@ -132,7 +106,6 @@ export default function ProfilePage() {
           },
           body: JSON.stringify({ profilePhoto: base64String }),
         });
-
         if (response.ok) {
           const data = await response.json();
           setUser((prev) =>
@@ -152,7 +125,6 @@ export default function ProfilePage() {
       router.push("/auth");
       return;
     }
-
     Promise.all([
       fetchMyProjects(),
       fetchSavedProjects(),
@@ -162,10 +134,10 @@ export default function ProfilePage() {
     });
   }, []);
 
+  // --- ACTIONS ---
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
     try {
       const response = await fetch("http://localhost:4000/api/editprofile", {
         method: "PUT",
@@ -173,12 +145,8 @@ export default function ProfilePage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          name: editName,
-          email: editEmail,
-        }),
+        body: JSON.stringify({ name: editName, email: editEmail }),
       });
-
       if (response.ok) {
         const updatedUser = await response.json();
         setUser((prev) =>
@@ -188,49 +156,41 @@ export default function ProfilePage() {
         );
         SetEditModal(false);
       } else {
-        const errorData = await response.json();
-        alert(errorData.message || "Failed to update profile");
+        alert("Failed to update profile");
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error(error);
     }
   }
 
   async function DeleteProject(project: Project) {
     const token = localStorage.getItem("token");
-    if (!token) {
-      alert("You must be logged in to delete.");
+    if (!token || !confirm("Are you sure you want to delete this project?"))
       return;
-    }
-
-    if (!confirm("Are you sure you want to delete this project?")) return;
-
     try {
       const response = await fetch(
         "http://localhost:4000/api/projects/" + project.id,
         {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       if (response.ok) {
-        setProjects((prevProjects) =>
-          prevProjects.filter((p) => p.id !== project.id)
-        );
-
-        console.log("Project deleted successfully");
+        setProjects((prev) => prev.filter((p) => p.id !== project.id));
       } else {
-        const errorData = await response.json();
-        alert(errorData.message || "Failed to delete project");
+        alert("Failed to delete");
       }
     } catch (error) {
-      console.error("Error deleting project:", error);
+      console.error(error);
     }
   }
+
+  // --- SHARE FUNCTIONALITY ---
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Link copied to clipboard!");
+    SetShareModal(false);
+  };
 
   const projectsToDisplay = activeTab === "created" ? projects : savedproject;
   const userName = user?.name || "Me";
@@ -278,9 +238,13 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex gap-3 mt-6">
-            <button className="bg-gray-200 px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition">
+            <button
+              onClick={() => SetShareModal(true)}
+              className="bg-gray-200 px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition"
+            >
               Share
             </button>
+
             <button
               onClick={() => {
                 if (user) {
@@ -294,16 +258,89 @@ export default function ProfilePage() {
               Edit Profile
             </button>
           </div>
+
+          {/* ----------------- SHARE MODAL ----------------- */}
+          {shareModal && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              onClick={() => SetShareModal(false)}
+            >
+              <div
+                className="bg-white rounded-3xl p-6 w-80 shadow-2xl relative animate-in fade-in zoom-in duration-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-lg">Share Profile</h3>
+                  <button
+                    onClick={() => SetShareModal(false)}
+                    className="text-gray-500 hover:text-black font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <p className="text-sm text-gray-500 mb-6 text-center">
+                  Share this profile with your friends!
+                </p>
+
+                <div className="flex justify-center gap-4 mb-6">
+                  {/* WhatsApp */}
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `https://wa.me/?text=Check out this profile: ${window.location.href}`
+                      )
+                    }
+                    className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-2xl hover:bg-green-200 transition"
+                    title="WhatsApp"
+                  >
+                    💬
+                  </button>
+                  {/* Twitter */}
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `https://twitter.com/intent/tweet?url=${window.location.href}&text=Check out this profile!`
+                      )
+                    }
+                    className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-2xl hover:bg-blue-200 transition"
+                    title="Twitter"
+                  >
+                    🐦
+                  </button>
+                  {/* Email */}
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `mailto:?subject=Check out this profile&body=${window.location.href}`
+                      )
+                    }
+                    className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-2xl hover:bg-gray-200 transition"
+                    title="Email"
+                  >
+                    ✉️
+                  </button>
+                </div>
+
+                <button
+                  onClick={copyLink}
+                  className="w-full bg-gray-100 hover:bg-gray-200 py-3 rounded-full font-bold text-gray-800 transition flex items-center justify-center gap-2"
+                >
+                  🔗 Copy Link
+                </button>
+              </div>
+            </div>
+          )}
+          {/* ----------------------------------------------- */}
         </div>
 
-        {/* ----------------- EDIT MODAL ----------------- */}
+        {/* Edit Modal (Existing) */}
         {editModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200">
               <h2 className="text-2xl font-bold mb-6 text-center">
                 Edit Profile
               </h2>
-
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -313,11 +350,10 @@ export default function ProfilePage() {
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Your name"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email
@@ -326,22 +362,21 @@ export default function ProfilePage() {
                     type="email"
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Your email"
                   />
                 </div>
-
                 <div className="flex gap-3 mt-8">
                   <button
                     type="button"
                     onClick={() => SetEditModal(false)}
-                    className="flex-1 px-4 py-3 rounded-full font-bold bg-gray-100 hover:bg-gray-200 transition text-gray-700"
+                    className="flex-1 px-4 py-3 rounded-full font-bold bg-gray-100 hover:bg-gray-200"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-3 rounded-full font-bold bg-black text-white hover:bg-gray-800 transition"
+                    className="flex-1 px-4 py-3 rounded-full font-bold bg-black text-white hover:bg-gray-800"
                   >
                     Save Changes
                   </button>
@@ -350,33 +385,24 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
-        {/* ----------------------------------------------- */}
 
         {/* Tab Buttons */}
         <div className="flex justify-center gap-8 mb-8 border-b border-transparent">
           <button
             onClick={() => setActiveTab("created")}
-            className={`font-bold pb-2 transition ${
-              activeTab === "created"
-                ? "border-b-4 border-black text-black"
-                : "text-gray-500 hover:text-black"
-            }`}
+            className={`font-bold pb-2 transition ${activeTab === "created" ? "border-b-4 border-black text-black" : "text-gray-500 hover:text-black"}`}
           >
             Created
           </button>
           <button
             onClick={() => setActiveTab("saved")}
-            className={`font-bold pb-2 transition ${
-              activeTab === "saved"
-                ? "border-b-4 border-black text-black"
-                : "text-gray-500 hover:text-black"
-            }`}
+            className={`font-bold pb-2 transition ${activeTab === "saved" ? "border-b-4 border-black text-black" : "text-gray-500 hover:text-black"}`}
           >
             Saved
           </button>
         </div>
 
-        {/* Image Grid Area */}
+        {/* Image Grid */}
         {loading ? (
           <p className="text-center mt-10">Loading...</p>
         ) : projectsToDisplay.length === 0 ? (
@@ -409,12 +435,10 @@ export default function ProfilePage() {
                         "https://via.placeholder.com/300?text=Error")
                     }
                   />
-
                   {activeTab === "created" && (
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); // Stop clicking the card itself
-                        // 👇 NAVIGATE WITH ID
+                        e.stopPropagation();
                         router.push(
                           `/pin-creation-tool?mode=edit&projectId=${project.id}`
                         );
@@ -425,8 +449,7 @@ export default function ProfilePage() {
                     </button>
                   )}
                 </div>
-
-                <h3 className="font-bold text-gray-900 text-sm truncate px-1">
+                <h3 className="font-bhttp://localhost:3000/profileold text-gray-900 text-sm truncate px-1">
                   {project.title}
                 </h3>
               </div>

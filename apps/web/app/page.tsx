@@ -3,7 +3,7 @@ import Sidebar from "@repo/ui/Sidebar";
 import PinModal from "@repo/ui/PinModal";
 import { useState, useEffect, MouseEventHandler } from "react";
 import Likeicon from "@repo/ui/Likeicon";
-import { li } from "framer-motion/client";
+import Searchbar from "@repo/ui/Searchbar";
 
 interface Project {
   id: number;
@@ -133,7 +133,7 @@ export default function App() {
         const isLikedNow = data.liked;
 
         setProjects((prevProjects) =>
-          prevProjects.map((p) => {
+          prevProjects.map((p) => {alert("Please login first");
             if (p.id === projectId) {
               return {
                 ...p,
@@ -152,8 +152,10 @@ export default function App() {
     }
   }
 
+
+
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen  bg-black">
       <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} />
 
       {plusiconModal && <PinModal />}
@@ -179,6 +181,10 @@ export default function App() {
       )}
 
       <main className="ml-24 p-6">
+        <div className="mt-2 mb-8 flex justify-center">
+          <Searchbar />
+        </div>
+
         <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4 mx-auto max-w-[1600px]">
           {projects.map((project) => {
             const userName = project.user?.name || "User";

@@ -1,7 +1,7 @@
 "use client";
 import Sidebar from "@repo/ui/Sidebar";
 import PinModal from "@repo/ui/PinModal";
-import { useState, useEffect, MouseEventHandler } from "react";
+import { useState, useEffect } from "react";
 import Likeicon from "@repo/ui/Likeicon";
 import Searchbar from "@repo/ui/Searchbar";
 
@@ -26,6 +26,8 @@ export default function App() {
 
   const [imageModal, SetimageModal] = useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<string>("");
+
+  const [query, setQuery] = useState("");
 
   async function fetchProjects() {
     const token = localStorage.getItem("token");
@@ -113,8 +115,7 @@ export default function App() {
     e.stopPropagation();
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login first");
-      return;
+      alert("please login first");
     }
 
     try {
@@ -133,7 +134,7 @@ export default function App() {
         const isLikedNow = data.liked;
 
         setProjects((prevProjects) =>
-          prevProjects.map((p) => {alert("Please login first");
+          prevProjects.map((p) => {
             if (p.id === projectId) {
               return {
                 ...p,
@@ -152,10 +153,13 @@ export default function App() {
     }
   }
 
-
+  // Filter projects based on search query
+  const filteredProjects = projects.filter((p) =>
+    p.title.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen  bg-black">
+    <div className="min-h-screen bg-black">
       <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} />
 
       {plusiconModal && <PinModal />}
@@ -182,11 +186,11 @@ export default function App() {
 
       <main className="ml-24 p-6">
         <div className="mt-2 mb-8 flex justify-center">
-          <Searchbar />
-        </div>
+          <Searchbar query={query} Setquery={setQuery} />
+        </div>=
 
         <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4 mx-auto max-w-[1600px]">
-          {projects.map((project) => {
+          {filteredProjects.map((project) => {
             const userName = project.user?.name || "User";
             const userInitial = userName.charAt(0).toUpperCase();
 

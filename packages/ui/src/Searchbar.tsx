@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 
-export default function Searchbar() {
-  const [query, setQuery] = useState("");
+interface SearchbarProps {
+  query: string;
+  Setquery: (val: string) => void;
+}
 
+export default function Searchbar({ query, Setquery }: SearchbarProps) {
   return (
-    <div className="flex justify-center w-full px-4">
-      {/* Updates:
-          1. bg-gray-100 (Brighter than gray-200)
-          2. focus-within:ring-blue-300 (More visible/brighter blue ring) 
-      */}
+    <div className="flex justify-center mt-4 w-full px-4">
       <div className="flex items-center w-full max-w-4xl bg-gray-100 rounded-full px-5 py-3 text-gray-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-300 transition-all duration-200 ease-in-out shadow-sm hover:bg-gray-200">
         {/* Search Icon */}
         <svg
@@ -34,7 +33,7 @@ export default function Searchbar() {
           placeholder="Search"
           className="bg-transparent border-none outline-none w-full ml-3 text-gray-900 placeholder-gray-500 font-medium"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => Setquery(e.target.value)}
         />
       </div>
     </div>

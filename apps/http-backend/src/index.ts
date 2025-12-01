@@ -568,6 +568,81 @@ app.post("/api/projects/:id/save", middleware, async (req, res) => {
   }
 });
 
+app.post("/api/projects/:id/comments", middleware, async (req, res) => {
+  const userId = (req as any).user?.id;
+  if (!userId) {
+    return res.status(401).json({ message: "User is not verified" });
+  }
+  const projectId = parseInt(req.params.id!);
+  if (isNaN(projectId)) {
+    return res.status(400).json({ message: "Invalid Project ID" });
+  }
+
+  const text = req.body.text;
+  if (!text || text.trim() === "") {
+    return res.status(400).json({ message: "Comment text cannot be empty" });
+  }
+
+  try {
+    const newComment = await prisma.comment.create({
+      data: {
+        text: text,
+        projectId: projectId,
+        userId: userId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            profilePhoto: true,
+          },
+        },
+      },
+    });
+
+    return res.status(201).json(newComment);
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.get("/api/projects/:id/comments", middleware, async (req, res) => {
+  const userId = (req as any).user?.id;
+  if (!userId) {
+    return res.status(401).json({ message: "User is not verified" });
+  }
+  const projectId = parseInt(req.params.id!);
+  if (isNaN(projectId)) {
+    return res.status(400).json({ message: "Invalid Project ID" });
+  }
+  try {
+    const comments = await prisma.comment.findMany({
+      where: {
+        projectId: projectId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            profilePhoto: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return res.status(200).json(comments);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`🚀 http-backend listening at http://localhost:${port}`);
 });

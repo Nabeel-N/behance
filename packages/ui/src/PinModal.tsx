@@ -15,9 +15,6 @@ export default function PinModal() {
         >
           Create Pin
         </button>
-        <button className="text-left px-3 py-2 hover:bg-gray-100 rounded-lg text-sm transition-colors text-gray-700">
-          Create Board
-        </button>
       </div>
     </div>
   );

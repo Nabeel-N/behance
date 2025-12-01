@@ -7,7 +7,7 @@ export default function LikeIcon({ liked, onClick }: LikeIconProps) {
   return (
     <button
       onClick={onClick}
-      className={`rounded-full p-3 border transition-all duration-200 shadow-sm flex items-center justify-center group ${
+      className={`rounded-full p-2  border transition-all duration-200 shadow-sm flex items-center justify-center group ${
         liked
           ? "bg-red-500 border-red-500 text-white"
           : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300"
@@ -19,7 +19,7 @@ export default function LikeIcon({ liked, onClick }: LikeIconProps) {
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="w-6 h-6 transition-transform group-active:scale-90"
+        className="w-5 h-5 transition-transform group-active:scale-90"
       >
         {/* This is the Thumbs Up path you provided */}
         <path

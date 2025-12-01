@@ -13,6 +13,8 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
   const toggleView = () => {
     setIsLoginView(!isLoginView);
     setEmail("");
@@ -27,7 +29,6 @@ export default function AuthPage() {
     setError("");
     setSuccess("");
 
-    const API_BASE = "http://localhost:4000";
     const endpoint = isLoginView
       ? `${API_BASE}/api/signin`
       : `${API_BASE}/api/signup`;
@@ -45,8 +46,6 @@ export default function AuthPage() {
 
       const data = await response.json();
 
-      console.log("Server Response:", data);
-
       if (!response.ok) {
         throw new Error(data.message || "Authentication failed");
       }
@@ -58,7 +57,6 @@ export default function AuthPage() {
 
           setTimeout(() => router.push("/"), 500);
         } else {
-          console.error("Login succeeded but no token found in:", data);
           setError("Login error: Server did not return a token.");
         }
       } else {
@@ -66,7 +64,6 @@ export default function AuthPage() {
         toggleView();
       }
     } catch (err: any) {
-      console.error(err);
       setError(err.message);
     }
   };

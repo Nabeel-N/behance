@@ -1,6 +1,6 @@
 interface LikeIconProps {
   liked: boolean;
-  onClick?: (e: React.MouseEvent) => void; // Optional onClick handler
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 export default function LikeIcon({ liked, onClick }: LikeIconProps) {
@@ -19,7 +19,7 @@ export default function LikeIcon({ liked, onClick }: LikeIconProps) {
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="w-5 h-5 transition-transform group-active:scale-90"
+        className="si transition-transform group-active:scale-90"
       >
         {/* This is the Thumbs Up path you provided */}
         <path

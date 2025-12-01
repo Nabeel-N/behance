@@ -6,7 +6,7 @@ import { prisma, User } from "@repo/db";
 import { middleware } from "./middleware";
 
 const app = express();
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));

@@ -36,9 +36,9 @@ export default function App() {
   const [plusiconModal, SetPlusIonModal] = useState<boolean>(false);
   const [projects, setProjects] = useState<Project[]>([]);
 
-  // --- Modal & Comment States ---
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
 
@@ -146,7 +146,7 @@ export default function App() {
 
       if (response.ok) {
         const data = await response.json();
-        const isLikedNow = data.liked; // Assuming backend returns { liked: true/false }
+        const isLikedNow = data.liked;
 
         setProjects((prev) =>
           prev.map((p) =>

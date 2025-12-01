@@ -5,7 +5,7 @@ export default function ProfileIcon() {
   const router = useRouter();
   return (
     <button
-      className="border-4 bg-gray-200 p-2 border-gray-300 rounded-full hover:bg-violet-600 focus:outline-2 focus:outline-offset-2 focus:outline-violet-500 "
+      className="border-4 bg-indigo-600 p-2 border-gray-300 rounded-full hover:bg-indigo-500 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-400 "
       onClick={() => router.push("/profile")}
     >
       <svg

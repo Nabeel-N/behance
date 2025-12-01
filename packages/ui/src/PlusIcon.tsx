@@ -7,7 +7,7 @@ export default function PlusIcon({ onClick }: PlusIconProps) {
   return (
     <button
       onClick={onClick}
-      className="p-2 bg-neutral-200 shadow-xl border-4 border-gray-400 rounded-full hover:bg-emerald-700"
+      className="p-2 bg-emerald-700 shadow-xl border-4 border-gray-400 rounded-full hover:bg-emerald-600"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -15,7 +15,7 @@ export default function PlusIcon({ onClick }: PlusIconProps) {
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="size-8"
+        className="size-10"
       >
         <path
           strokeLinecap="round"

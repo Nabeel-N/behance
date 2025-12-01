@@ -1,11 +1,11 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function HomeIcon() {
   const router = useRouter();
   return (
     <button
-      className="p-4 bg-gray-200 hover:bg-rose-700 rounded-full border-4 border-gray-400"
+      className="p-2 bg-red-800 hover:bg-rose-700 rounded-full border-4 border-gray-400"
       onClick={() => router.push("/")}
     >
       <svg
@@ -14,7 +14,7 @@ export default function HomeIcon() {
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="size-6"
+        className="size-10"
       >
         <path
           strokeLinecap="round"

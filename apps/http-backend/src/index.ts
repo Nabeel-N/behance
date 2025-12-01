@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
-import { prisma, Project, User } from "@repo/db";
+import { prisma, User } from "@repo/db";
 import { middleware } from "./middleware";
 
 const app = express();

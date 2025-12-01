@@ -21,7 +21,7 @@ export default function Sidebar({ openvariable, funOpenmodal }: SidebarProps) {
       <PlusIcon onClick={() => funOpenmodal(!openvariable)} />
       <button
         onClick={() => router.push("/auth")}
-        className="p-2 rounded-lg shadow-2xl border-2 border-gray-700 font-semibold text-lg  bg-blue-700 hover:bg-blue-600 transition-all"
+        className="p-2 mt-64 rounded-lg shadow-2xl border-2 border-gray-700 font-semibold text-lg  bg-blue-700 hover:bg-blue-600 transition-all"
       >
         Log in
       </button>

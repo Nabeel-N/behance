@@ -269,17 +269,19 @@ export default function ProfilePage() {
                 className="bg-white rounded-3xl p-6 w-80 shadow-2xl relative animate-in fade-in zoom-in duration-200"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-center items-center mb-4">
                   <h3 className="font-bold text-lg">Share Profile</h3>
-                  <button
-                    onClick={() => SetShareModal(false)}
-                    className="text-gray-500 hover:text-black font-bold"
-                  >
-                    ✕
-                  </button>
+                  <div className="flex items-end justify-end ml-24">
+                    <button
+                      onClick={() => SetShareModal(false)}
+                      className="text-gray-500 hover:text-black font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-6 text-center">
+                <p className="text-md font-semibold text-gray-500 mb-6 text-center">
                   Share this profile with your friends!
                 </p>
 

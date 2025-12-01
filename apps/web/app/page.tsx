@@ -32,6 +32,8 @@ interface Project {
   };
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
 export default function App() {
   const [plusiconModal, SetPlusIonModal] = useState<boolean>(false);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -47,7 +49,7 @@ export default function App() {
   async function fetchProjects() {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:4000/api/projects", {
+      const response = await fetch(`${API_URL}/api/projects`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -75,8 +77,9 @@ export default function App() {
     const token = localStorage.getItem("token");
 
     try {
+      // 3. Updated to use API_URL
       const resComments = await fetch(
-        `http://localhost:4000/api/projects/${project.id}/comments`,
+        `${API_URL}/api/projects/${project.id}/comments`,
         {
           method: "GET",
           headers: {
@@ -114,16 +117,14 @@ export default function App() {
     if (!token) return alert("Please login first");
 
     try {
-      const res = await fetch(
-        `http://localhost:4000/api/projects/${projectId}/save`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // 4. Updated to use API_URL
+      const res = await fetch(`${API_URL}/api/projects/${projectId}/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (res.ok) alert("Saved to profile");
     } catch (error) {
       console.error("Error saving project:", error);
@@ -136,8 +137,9 @@ export default function App() {
     if (!token) return alert("Please login first");
 
     try {
+      // 5. Updated to use API_URL
       const response = await fetch(
-        `http://localhost:4000/api/projects/${projectId}/like`,
+        `${API_URL}/api/projects/${projectId}/like`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -176,8 +178,9 @@ export default function App() {
     if (!token) return alert("Please login first");
 
     try {
+      // 6. Updated to use API_URL
       const response = await fetch(
-        `http://localhost:4000/api/projects/${selectedProject.id}/comments`,
+        `${API_URL}/api/projects/${selectedProject.id}/comments`,
         {
           method: "POST",
           headers: {

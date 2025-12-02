@@ -117,7 +117,6 @@ export default function App() {
     if (!token) return alert("Please login first");
 
     try {
-      // 4. Updated to use API_URL
       const res = await fetch(`${API_URL}/api/projects/${projectId}/save`, {
         method: "POST",
         headers: {
@@ -137,7 +136,6 @@ export default function App() {
     if (!token) return alert("Please login first");
 
     try {
-      // 5. Updated to use API_URL
       const response = await fetch(
         `${API_URL}/api/projects/${projectId}/like`,
         {
@@ -178,7 +176,6 @@ export default function App() {
     if (!token) return alert("Please login first");
 
     try {
-      // 6. Updated to use API_URL
       const response = await fetch(
         `${API_URL}/api/projects/${selectedProject.id}/comments`,
         {
@@ -339,7 +336,6 @@ export default function App() {
               <div
                 key={project.id}
                 className="break-inside-avoid relative group mb-6"
-                // Click Card -> Open Modal
                 onClick={() => openProjectModal(project)}
               >
                 <div className="rounded-xl overflow-hidden mb-3 bg-gray-900 cursor-zoom-in">

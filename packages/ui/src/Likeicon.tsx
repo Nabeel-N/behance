@@ -15,13 +15,12 @@ export default function LikeIcon({ liked, onClick }: LikeIconProps) {
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        fill={liked ? "currentColor" : "none"}
+        fill="none"
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="si transition-transform group-active:scale-90"
+        className="size-6"
       >
-        {/* This is the Thumbs Up path you provided */}
         <path
           strokeLinecap="round"
           strokeLinejoin="round"

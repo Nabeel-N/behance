@@ -4,6 +4,8 @@ import Sidebar from "@repo/ui/Sidebar";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useRef, useEffect, Suspense } from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
 function PinCreationToolContent() {
   const [title, SetTitle] = useState<string>("");
   const [image, Setimage] = useState<string>("");
@@ -23,9 +25,8 @@ function PinCreationToolContent() {
     if (editMode && projectId) {
       async function fetchProjectData() {
         try {
-          const response = await fetch(
-            `http://localhost:4000/api/projects/${projectId}`
-          );
+          // 👇 Updated
+          const response = await fetch(`${API_URL}/api/projects/${projectId}`);
           if (response.ok) {
             const data = await response.json();
             SetTitle(data.title);
@@ -56,9 +57,10 @@ function PinCreationToolContent() {
     setIsUploading(true);
 
     try {
+      // 👇 Updated
       const url = editMode
-        ? `http://localhost:4000/api/projects/${projectId}`
-        : "http://localhost:4000/api/projects";
+        ? `${API_URL}/api/projects/${projectId}`
+        : `${API_URL}/api/projects`;
 
       const method = editMode ? "PUT" : "POST";
 

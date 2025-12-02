@@ -27,6 +27,8 @@ interface User {
   profilePhoto: string | null;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
 export default function ProfilePage() {
   const router = useRouter();
 
@@ -50,12 +52,13 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // --- API CALLS ---
+  // --- API CALLS (Updated to use API_URL) ---
   async function fetchMyProjects() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const response = await fetch("http://localhost:4000/api/projects/mine", {
+      // 👇 Updated
+      const response = await fetch(`${API_URL}/api/projects/mine`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) setProjects(await response.json());
@@ -68,7 +71,8 @@ export default function ProfilePage() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const response = await fetch("http://localhost:4000/api/projects/saved", {
+      // 👇 Updated
+      const response = await fetch(`${API_URL}/api/projects/saved`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) setSavedProjects(await response.json());
@@ -81,7 +85,8 @@ export default function ProfilePage() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const response = await fetch("http://localhost:4000/api/me", {
+      // 👇 Updated
+      const response = await fetch(`${API_URL}/api/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) setUser(await response.json());
@@ -98,7 +103,8 @@ export default function ProfilePage() {
       const base64String = reader.result as string;
       const token = localStorage.getItem("token");
       try {
-        const response = await fetch("http://localhost:4000/api/uploadimage", {
+        // 👇 Updated
+        const response = await fetch(`${API_URL}/api/uploadimage`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -134,12 +140,13 @@ export default function ProfilePage() {
     });
   }, []);
 
-  // --- ACTIONS ---
+  // --- ACTIONS (Updated to use API_URL) ---
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:4000/api/editprofile", {
+      // 👇 Updated
+      const response = await fetch(`${API_URL}/api/editprofile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -168,13 +175,11 @@ export default function ProfilePage() {
     if (!token || !confirm("Are you sure you want to delete this project?"))
       return;
     try {
-      const response = await fetch(
-        "http://localhost:4000/api/projects/" + project.id,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      // 👇 Updated
+      const response = await fetch(`${API_URL}/api/projects/${project.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (response.ok) {
         setProjects((prev) => prev.filter((p) => p.id !== project.id));
       } else {
@@ -451,7 +456,7 @@ export default function ProfilePage() {
                     </button>
                   )}
                 </div>
-                <h3 className="font-bhttp://localhost:3000/profileold text-gray-900 text-sm truncate px-1">
+                <h3 className="font-bold text-gray-900 text-sm truncate px-1">
                   {project.title}
                 </h3>
               </div>

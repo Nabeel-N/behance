@@ -44,7 +44,6 @@ export default function ProfilePage() {
   const [editEmail, setEditEmail] = useState("");
 
   const [shareModal, SetShareModal] = useState<boolean>(false);
-  const [notificationModal, SetNotificationModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
@@ -206,8 +205,6 @@ export default function ProfilePage() {
           <Sidebar
             openvariable={plusiconModal}
             funOpenmodal={SetPlusIonModal}
-            noficaiton={notificationModal}
-            fnnotifi_modal={SetNotificationModal}
           />
 
           {/* Profile Photo */}

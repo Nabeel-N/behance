@@ -1,6 +1,6 @@
 "use client";
 
-// 1. Define the shape of your data
+
 interface Notification {
   id: number;
   text: string;

@@ -14,7 +14,6 @@ interface SidebarProps {
 
 export default function Sidebar({ openvariable, funOpenmodal }: SidebarProps) {
   const router = useRouter();
-  // 👇 State to toggle notifications
   const [showNotifications, setShowNotifications] = useState(false);
 
   return (

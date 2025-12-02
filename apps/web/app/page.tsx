@@ -6,6 +6,8 @@ import Likeicon from "@repo/ui/Likeicon";
 import Searchbar from "@repo/ui/Searchbar";
 import CommentIcon from "@repo/ui/CommentIcon";
 
+import { div } from "framer-motion/client";
+
 interface User {
   id: number;
   name: string | null;
@@ -46,6 +48,8 @@ export default function App() {
 
   const [query, setQuery] = useState("");
 
+  const [notificationModal, SetNotificationModal] = useState<boolean>(false);
+
   async function fetchProjects() {
     const token = localStorage.getItem("token");
     try {
@@ -77,7 +81,6 @@ export default function App() {
     const token = localStorage.getItem("token");
 
     try {
-      // 3. Updated to use API_URL
       const resComments = await fetch(
         `${API_URL}/api/projects/${project.id}/comments`,
         {
@@ -214,7 +217,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-gray-200">
-      <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} />
+      <Sidebar
+        openvariable={plusiconModal}
+        funOpenmodal={SetPlusIonModal}
+        noficaiton={notificationModal}
+        fnnotifi_modal={SetNotificationModal}
+      />
       {plusiconModal && <PinModal />}
 
       {/* --- SPLIT VIEW MODAL --- */}
@@ -328,6 +336,8 @@ export default function App() {
         </div>
 
         <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4 mx-auto max-w-[1600px]">
+          
+
           {filteredProjects.map((project) => {
             const userName = project.user?.name || "User";
             const userInitial = userName.charAt(0).toUpperCase();
@@ -369,8 +379,10 @@ export default function App() {
                       </div>
                       <p className="text-xs text-gray-400 truncate max-w-[80px]">
                         {userName}
+
                       </p>
                     </div>
+                    
 
                     <div className="flex items-center gap-3">
                       {/* Like Section */}
@@ -385,6 +397,9 @@ export default function App() {
                           </span>
                         )}
                       </div>
+
+
+                      
 
                       {/* Comment Section */}
                       <div className="flex items-center gap-1">

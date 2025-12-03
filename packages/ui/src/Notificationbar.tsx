@@ -23,17 +23,19 @@ interface NotificationbarProps {
   projects: Project[];
 }
 
-export default function Notificationbar({ projects }: NotificationbarProps) {
+export default function Notificationbar({
+  projects = [],
+}: NotificationbarProps) {
   const latestProject = projects.slice(0, 1);
   const olderProjects = projects.slice(1);
 
   const isEmpty = projects.length === 0;
 
   return (
-    <div className="w-[360px] bg-white rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.1)] border border-gray-100 flex flex-col max-h-[85vh] overflow-y-auto pb-4">
+    <div className="w-[360px] bg-white rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.1)]  border-gray-100 flex flex-col max-h-[85vh] overflow-y-auto pb-4">
       {/* Header */}
-      <div className="sticky top-0 bg-white z-10 px-6 py-6 pb-2">
-        <h2 className="text-xl font-bold text-gray-900">Updates</h2>
+      <div className="sticky  top-0 bg-black z-10 px-6 py-6 pb-2">
+        <h2 className="text-2xl  font-bold bg-black  text-white">Updates</h2>
       </div>
 
       {/* Content List */}

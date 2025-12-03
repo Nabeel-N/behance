@@ -6,6 +6,7 @@ import Likeicon from "@repo/ui/Likeicon";
 import Searchbar from "@repo/ui/Searchbar";
 import CommentIcon from "@repo/ui/CommentIcon";
 
+
 interface User {
   id: number;
   name: string | null;
@@ -45,7 +46,6 @@ export default function App() {
   const [commentText, setCommentText] = useState("");
 
   const [query, setQuery] = useState("");
-
 
   async function fetchProjects() {
     const token = localStorage.getItem("token");
@@ -214,7 +214,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-gray-200">
-      <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} projects={projects}/>
+      <Sidebar
+        openvariable={plusiconModal}
+        funOpenmodal={SetPlusIonModal}
+        projects={projects}
+      />
       {plusiconModal && <PinModal />}
 
       {/* --- SPLIT VIEW MODAL --- */}

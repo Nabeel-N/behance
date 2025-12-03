@@ -6,7 +6,8 @@ import PlusIcon from "./PlusIcon";
 import ProfileIcon from "./ProfileIcon";
 import Pinlogo from "./logo";
 import Notificationbar from "./Notificationbar";
-
+import ChatIcon from "@repo/ui/ChatIcon";
+import Chatbar from "./Chatbar";
 interface User {
   id: number;
   name: string | null;
@@ -26,16 +27,20 @@ interface Project {
   };
 }
 
-
 interface SidebarProps {
   openvariable: boolean;
   funOpenmodal: (openvariable: boolean) => void;
-  projects:Project[]
+  projects: Project[];
 }
 
-export default function Sidebar({ openvariable, funOpenmodal , projects }: SidebarProps) {
+export default function Sidebar({
+  openvariable,
+  funOpenmodal,
+  projects,
+}: SidebarProps) {
   const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showChat, SetShowChat] = useState<boolean>(false);
 
   return (
     <>
@@ -54,7 +59,7 @@ export default function Sidebar({ openvariable, funOpenmodal , projects }: Sideb
           {/* 👇 Notification Bell Icon */}
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`group p-3 rounded-xl transition-all duration-200 hover:bg-gray-100 ${
+            className={`group p-3 border-2 border-gray-300 bg-orange-100 rounded-full transition-all duration-200 hover:bg-gray-100 ${
               showNotifications ? "bg-black text-white" : "text-gray-400"
             }`}
           >
@@ -62,8 +67,8 @@ export default function Sidebar({ openvariable, funOpenmodal , projects }: Sideb
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              className={`w-7 h-7 transition-colors ${
-                showNotifications ? "text-white" : "group-hover:text-black"
+              className={`size-9  transition-colors ${
+                showNotifications ? "text-gray-800" : "group-hover:text-black"
               }`}
             >
               <path
@@ -76,20 +81,19 @@ export default function Sidebar({ openvariable, funOpenmodal , projects }: Sideb
 
           <ProfileIcon />
         </div>
+        <ChatIcon onClick={() => SetShowChat(!showChat)} />
 
         {/* Login Button */}
         <div className="mt-auto mb-4">
           <button
             onClick={() => router.push("/auth")}
-            className="px-3 py-2 rounded-full font-bold text-xs bg-red-600 text-white hover:bg-red-700 transition-colors"
+            className="px-3 py-2  rounded-full font-bold text-md bg-red-600 text-white hover:bg-red-700 transition-colors"
           >
             Log in
           </button>
         </div>
       </aside>
 
-      {/* 👇 Render the Notification Bar here */}
-      {/* "left-24" pushes it to the right of the sidebar */}
       {showNotifications && (
         <div className="fixed left-24 top-0 h-screen  z-40 flex items-start pt-4 pl-4">
           {/* Clicking outside closes it */}
@@ -100,6 +104,19 @@ export default function Sidebar({ openvariable, funOpenmodal , projects }: Sideb
 
           <div className="relative z-50">
             <Notificationbar projects={projects} />
+          </div>
+        </div>
+      )}
+
+      {showChat && (
+        <div className="fixed left-24 top-0 h-screen  z-40 flex items-start pt-4 pl-4">
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => SetShowChat(false)}
+          />
+
+          <div className="relative z-50">
+            <Chatbar />
           </div>
         </div>
       )}

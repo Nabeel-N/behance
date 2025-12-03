@@ -7,12 +7,33 @@ import ProfileIcon from "./ProfileIcon";
 import Pinlogo from "./logo";
 import Notificationbar from "./Notificationbar";
 
+interface User {
+  id: number;
+  name: string | null;
+  profilePhoto?: string;
+}
+
+interface Project {
+  id: number;
+  title: string;
+  image: string;
+  description?: string;
+  user?: User;
+  isLiked?: boolean;
+  _count: {
+    likes: number;
+    comments: number;
+  };
+}
+
+
 interface SidebarProps {
   openvariable: boolean;
   funOpenmodal: (openvariable: boolean) => void;
+  projects:Project[]
 }
 
-export default function Sidebar({ openvariable, funOpenmodal }: SidebarProps) {
+export default function Sidebar({ openvariable, funOpenmodal , projects }: SidebarProps) {
   const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -70,7 +91,7 @@ export default function Sidebar({ openvariable, funOpenmodal }: SidebarProps) {
       {/* 👇 Render the Notification Bar here */}
       {/* "left-24" pushes it to the right of the sidebar */}
       {showNotifications && (
-        <div className="fixed left-24 top-0 h-screen z-40 flex items-start pt-4 pl-4">
+        <div className="fixed left-24 top-0 h-screen  z-40 flex items-start pt-4 pl-4">
           {/* Clicking outside closes it */}
           <div
             className="fixed inset-0 z-30"
@@ -78,7 +99,7 @@ export default function Sidebar({ openvariable, funOpenmodal }: SidebarProps) {
           />
 
           <div className="relative z-50">
-            <Notificationbar />
+            <Notificationbar projects={projects} />
           </div>
         </div>
       )}

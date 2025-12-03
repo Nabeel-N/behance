@@ -1,54 +1,33 @@
 "use client";
 
-
-interface Notification {
+interface User {
   id: number;
-  text: string;
-  time: string;
-  image: string;
-  isNew: boolean;
+  name: string | null;
+  profilePhoto?: string;
 }
 
-const NOTIFICATIONS: Notification[] = [
-  {
-    id: 1,
-    text: "Your taste is next level",
-    time: "8h",
-    image:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop",
-    isNew: true,
-  },
-  {
-    id: 2,
-    text: "So iconic",
-    time: "1d",
-    image:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=200&auto=format&fit=crop",
-    isNew: false,
-  },
-  {
-    id: 3,
-    text: "Didn't know you needed this",
-    time: "1d",
-    image:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop",
-    isNew: false,
-  },
-  {
-    id: 4,
-    text: "Still searching? Explore ideas related to iPhone 11 Mud Cover",
-    time: "1d",
-    image:
-      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?q=80&w=200&auto=format&fit=crop",
-    isNew: false,
-  },
-];
+interface Project {
+  id: number;
+  title: string;
+  image: string;
+  description?: string;
+  user?: User;
+  isLiked?: boolean;
+  _count: {
+    likes: number;
+    comments: number;
+  };
+}
 
-export default function Notificationbar() {
-  const newUpdates = NOTIFICATIONS.filter((n) => n.isNew);
-  const seenUpdates = NOTIFICATIONS.filter((n) => !n.isNew);
+interface NotificationbarProps {
+  projects: Project[];
+}
 
-  const isEmpty = newUpdates.length === 0 && seenUpdates.length === 0;
+export default function Notificationbar({ projects }: NotificationbarProps) {
+  const latestProject = projects.slice(0, 1);
+  const olderProjects = projects.slice(1);
+
+  const isEmpty = projects.length === 0;
 
   return (
     <div className="w-[360px] bg-white rounded-3xl shadow-[0_0_20px_rgba(0,0,0,0.1)] border border-gray-100 flex flex-col max-h-[85vh] overflow-y-auto pb-4">
@@ -59,7 +38,6 @@ export default function Notificationbar() {
 
       {/* Content List */}
       <div className="flex flex-col px-2">
-        {/* 2. Empty State Handler */}
         {isEmpty && (
           <div className="p-8 text-center text-gray-500 text-sm">
             No updates yet.
@@ -67,25 +45,35 @@ export default function Notificationbar() {
         )}
 
         {/* New Section */}
-        {newUpdates.length > 0 && (
+        {latestProject.length > 0 && (
           <div className="mb-2">
             <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
               New
             </h3>
-            {newUpdates.map((item) => (
-              <NotificationItem key={item.id} item={item} />
+            {latestProject.map((project) => (
+              <NotificationItem
+                key={project.id}
+                title={project.title}
+                image={project.image}
+                time="Just now"
+              />
             ))}
           </div>
         )}
 
         {/* Seen Section */}
-        {seenUpdates.length > 0 && (
+        {olderProjects.length > 0 && (
           <div className="mb-2">
             <h3 className="px-4 py-2 text-sm font-semibold text-gray-900">
               Seen
             </h3>
-            {seenUpdates.map((item) => (
-              <NotificationItem key={item.id} item={item} />
+            {olderProjects.map((project) => (
+              <NotificationItem
+                key={project.id}
+                title={project.title}
+                image={project.image}
+                time="Recent"
+              />
             ))}
           </div>
         )}
@@ -94,31 +82,33 @@ export default function Notificationbar() {
   );
 }
 
-// 3. Proper Typing for the Sub-Component
-function NotificationItem({ item }: { item: Notification }) {
+function NotificationItem({
+  title,
+  image,
+  time,
+}: {
+  title: string;
+  image: string;
+  time: string;
+}) {
   return (
     <div className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-100 transition-colors cursor-pointer relative">
-      {/* Image Thumbnail */}
       <div className="w-16 h-16 flex-shrink-0">
         <img
-          src={item.image}
+          src={image}
           alt="Notification thumbnail"
           className="w-full h-full object-cover rounded-xl"
         />
       </div>
 
-      {/* Text Content */}
       <div className="flex-1 min-w-0">
         <p className="text-[15px] font-medium text-gray-900 leading-snug break-words line-clamp-3">
-          {item.text}
+          <span className="font-bold">You</span> uploaded: {title}
         </p>
       </div>
 
-      {/* Time & Options */}
       <div className="flex flex-col items-end justify-between h-14 py-1">
-        <span className="text-xs text-gray-500 font-medium">{item.time}</span>
-
-        {/* Three Dots Icon */}
+        <span className="text-xs text-gray-500 font-medium">{time}</span>
         <button className="text-gray-900 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded-full">
           <svg
             xmlns="http://www.w3.org/2000/svg"

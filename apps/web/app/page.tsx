@@ -46,7 +46,6 @@ export default function App() {
 
   const [query, setQuery] = useState("");
 
-  const [notificationModal, SetNotificationModal] = useState<boolean>(false);
 
   async function fetchProjects() {
     const token = localStorage.getItem("token");
@@ -215,7 +214,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-gray-200">
-      <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} />
+      <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} projects={projects}/>
       {plusiconModal && <PinModal />}
 
       {/* --- SPLIT VIEW MODAL --- */}

@@ -643,7 +643,34 @@ app.get("/api/projects/:id/comments", middleware, async (req, res) => {
   }
 });
 
+app.get("/api/users", middleware, async (req, res) => {
+  const search = req.query.search as string;
+  if (!search) {
+    return res.json([]);
+  }
 
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePhoto: true,
+      },
+      take: 10,
+    });
+    return res.status(200).json(users);
+  } catch (e) {
+    console.error("Error searching users:", e);
+    return res.status(500).json({ message: "Error searching users" });
+  }
+});
 
 app.listen(port, () => {
   console.log(`🚀 http-backend listening at http://localhost:${port}`);

@@ -1,20 +1,78 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect, MouseEventHandler } from "react";
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  profilePhoto?: string;
+}
 
 export default function Chatbar() {
   const [searchModal, setSearchModal] = useState(false);
+  const [profiledata, SetProfiledata] = useState<User[] | null>([]);
+  const [name, Setname] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [chatModal, SetChatModal] = useState<boolean>(false);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (name.trim()) {
+        profilesearchitem();
+      } else {
+        SetProfiledata([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [name]);
+
+  async function profilesearchitem() {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/users?search=${name}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("api/users fetching failed");
+      }
+      const data = await response.json();
+      SetProfiledata(data);
+    } catch (e) {
+      console.error(e);
+      SetProfiledata([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-50">
       <div className="w-[360px] bg-white rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.08)] border border-gray-100 flex flex-col h-[85vh] overflow-hidden">
         {/* Header Section */}
-        <div className="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 flex flex-col gap-4 min-h-[80px] justify-center">
+        <div className="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 flex flex-col gap-4 min-h-[80px] justify-center border-b border-gray-50">
           {searchModal ? (
             <div className="flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-              <SearchBar autoFocus />
+              <SearchBar autoFocus Setname={Setname} name={name} />
               <button
-                onClick={() => setSearchModal(false)}
+                onClick={() => {
+                  setSearchModal(false);
+                  Setname("");
+                  SetProfiledata([]);
+                }}
                 className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
                 aria-label="Close search"
               >
@@ -31,53 +89,73 @@ export default function Chatbar() {
         </div>
 
         {/* Content Area */}
-        <div className="flex flex-col px-4 gap-2 overflow-y-auto pb-4">
-          {/* Actions List - Only visible when NOT searching */}
+        <div className="flex flex-col gap-2 overflow-y-auto pb-4 flex-1">
+          {/* Main Actions - Hidden during search */}
           {!searchModal && (
-            <>
-              <div className="flex flex-col gap-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                {/* New Message - Toggles Search Modal */}
-                <button
-                  onClick={() => setSearchModal(true)}
-                  className="flex items-center gap-4 w-full p-3 hover:bg-gray-50 rounded-2xl transition-all group text-left"
-                >
-                  <div className="bg-red-50 p-3 rounded-full group-hover:bg-red-100 transition-colors text-red-600">
-                    <NewMessageIcon />
-                  </div>
+            <div className="flex flex-col gap-1 px-4 py-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <button
+                onClick={() => setSearchModal(true)}
+                className="flex items-center gap-4 w-full p-3 hover:bg-gray-50 rounded-2xl transition-all group text-left"
+              >
+                <div className="bg-red-50 p-3 rounded-full group-hover:bg-red-100 transition-colors text-red-600">
+                  <NewMessageIcon />
+                </div>
+                <span className="font-semibold text-gray-800 text-sm">
+                  New Message
+                </span>
+              </button>
+
+              <button className="flex items-center gap-4 w-full p-3 hover:bg-gray-50 rounded-2xl transition-all group text-left">
+                <div className="bg-gray-100 p-3 rounded-full group-hover:bg-gray-200 transition-colors text-gray-700">
+                  <AddFriendsIcon />
+                </div>
+                <div className="flex flex-col">
                   <span className="font-semibold text-gray-800 text-sm">
-                    New Message
+                    Invite Your Friends
                   </span>
-                </button>
+                  <span className="text-xs text-gray-500 font-medium">
+                    Connect to start chatting
+                  </span>
+                </div>
+              </button>
 
-                {/* Invite Friends */}
-                <button className="flex items-center gap-4 w-full p-3 hover:bg-gray-50 rounded-2xl transition-all group text-left">
-                  <div className="bg-gray-100 p-3 rounded-full group-hover:bg-gray-200 transition-colors text-gray-700">
-                    <AddFriendsIcon />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-gray-800 text-sm">
-                      Invite Your Friends
-                    </span>
-                    <span className="text-xs text-gray-500 font-medium">
-                      Connect to start chatting
-                    </span>
-                  </div>
-                </button>
-              </div>
-
-              {/* Divider */}
               <div className="h-px bg-gray-100 my-2 mx-2"></div>
-            </>
+            </div>
           )}
 
-          {/* Conditional Empty State / Search Results */}
-          <div className="text-center mt-10 opacity-40">
+          {/* Search Results or Empty State */}
+          <div className="px-2">
             {searchModal ? (
-              <p className="text-sm text-gray-400 animate-in fade-in zoom-in-95 duration-200">
-                Type a name to search...
-              </p>
+              loading ? (
+                <div className="flex justify-center p-8">
+                  <div className="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : profiledata && profiledata.length > 0 ? (
+                <div className="flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-200">
+                  <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Found Users
+                  </p>
+                  {profiledata.map((user) => (
+                    <UserItem
+                      key={user.id}
+                      user={user}
+                      onClick={() => SetChatModal(!chatModal)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center mt-10 opacity-40">
+                  <p className="text-sm text-gray-400">
+                    {name ? "No users found" : "Type a name to search..."}
+                  </p>
+                </div>
+              )
             ) : (
-              <p className="text-sm text-gray-400">No active chats found</p>
+              <div className="flex flex-col gap-1 animate-in fade-in slide-in-from-bottom-3 duration-300">
+                <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Recent
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -86,9 +164,84 @@ export default function Chatbar() {
   );
 }
 
-// --- Components ---
+// --- Sub-Components ---
 
-function SearchBar({ autoFocus }: { autoFocus: boolean }) {
+function UserItem({
+  user,
+  onClick,
+}: {
+  user: User;
+  onClick: MouseEventHandler;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-3 w-full p-3 hover:bg-gray-50 rounded-2xl transition-all group text-left"
+    >
+      <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm shrink-0">
+        {user.profilePhoto ? (
+          <img
+            src={user.profilePhoto}
+            alt={user.name}
+            className="w-full h-full rounded-full object-cover"
+          />
+        ) : (
+          user.name?.charAt(0).toUpperCase() || "?"
+        )}
+      </div>
+      <div className="flex flex-col min-w-0">
+        <span className="font-semibold text-gray-800 text-sm truncate">
+          {user.name}
+        </span>
+        <span className="text-xs text-gray-500 truncate">{user.email}</span>
+      </div>
+    </button>
+  );
+}
+
+function ChatItem({
+  name,
+  message,
+  time,
+  unread,
+}: {
+  name: string;
+  message: string;
+  time: string;
+  unread: number;
+}) {
+  return (
+    <button className="flex items-center gap-3 w-full p-3 hover:bg-gray-50 rounded-2xl transition-all group text-left">
+      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 font-bold text-sm shrink-0">
+        {name.charAt(0)}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-baseline mb-0.5">
+          <span className="font-semibold text-gray-900 text-sm truncate">
+            {name}
+          </span>
+          <span className="text-[10px] text-gray-400">{time}</span>
+        </div>
+        <p className="text-xs text-gray-500 truncate group-hover:text-gray-700 transition-colors">
+          {message}
+        </p>
+      </div>
+      {unread > 0 && (
+        <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold shrink-0">
+          {unread}
+        </div>
+      )}
+    </button>
+  );
+}
+
+interface SearchBarProps {
+  autoFocus: boolean;
+  name: string;
+  Setname: (v: string) => void;
+}
+
+function SearchBar({ autoFocus, name, Setname }: SearchBarProps) {
   return (
     <div className="relative group w-full">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -106,6 +259,8 @@ function SearchBar({ autoFocus }: { autoFocus: boolean }) {
         </svg>
       </div>
       <input
+        onChange={(e) => Setname(e.target.value)}
+        value={name}
         autoFocus={autoFocus}
         type="text"
         className="block w-full pl-9 pr-3 py-2.5 border border-transparent rounded-xl leading-5 bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-red-100 focus:border-red-200 transition-all duration-200 text-sm"

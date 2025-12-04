@@ -6,7 +6,6 @@ import Likeicon from "@repo/ui/Likeicon";
 import Searchbar from "@repo/ui/Searchbar";
 import CommentIcon from "@repo/ui/CommentIcon";
 
-
 interface User {
   id: number;
   name: string | null;
@@ -76,6 +75,9 @@ export default function App() {
     setComments([]);
 
     const token = localStorage.getItem("token");
+    if (!token) {
+      return;
+    }
 
     try {
       const resComments = await fetch(

@@ -129,7 +129,11 @@ function PinCreationToolContent() {
   return (
     <div className="flex min-h-screen bg-white">
       <main className="flex-1 p-0 md:p-6 w-full ml-0 md:ml-24">
-        <Sidebar openvariable={plusiconModal} funOpenmodal={SetPlusIonModal} />
+        <Sidebar
+          projects={[]}
+          openvariable={plusiconModal}
+          funOpenmodal={SetPlusIonModal}
+        />
 
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 md:border-none">
           <h1 className="text-xl font-bold text-gray-900">

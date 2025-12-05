@@ -138,7 +138,6 @@ export default function ProfilePage() {
     });
   }, []);
 
-  // --- ACTIONS (Updated to use API_URL) ---
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const token = localStorage.getItem("token");
@@ -188,7 +187,6 @@ export default function ProfilePage() {
     }
   }
 
-  // --- SHARE FUNCTIONALITY ---
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     alert("Link copied to clipboard!");
@@ -203,6 +201,7 @@ export default function ProfilePage() {
       <main className="flex-1 ml-0 md:ml-24 p-6 relative">
         <div className="flex flex-col items-center justify-center mb-12 mt-8">
           <Sidebar
+            projects={[]}
             openvariable={plusiconModal}
             funOpenmodal={SetPlusIonModal}
           />

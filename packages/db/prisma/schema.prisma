@@ -18,6 +18,8 @@ model User {
   savedprojects Project[] @relation("savedprojects")
   likes    Like[]
   comments Comment[]
+  messages      Message[]  @relation("Sender")
+  chatRooms     ChatRoom[] 
 }
 
 model Project {
@@ -59,6 +61,31 @@ model Comment {
 
   @@index([userId])
   @@index([projectId])
+}
+
+model ChatRoom {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt 
+  
+  users     User[]    
+  messages  Message[] 
+}
+
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  text      String
+  createdAt DateTime @default(now())
+
+
+  senderId  Int
+  sender    User     @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  roomId    Int
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  @@index([roomId]) 
 }
 
 

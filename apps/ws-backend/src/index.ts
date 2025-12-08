@@ -1,22 +1,35 @@
 import express from "express";
 import http from "http";
 import { WebSocketServer, WebSocket } from "ws";
+import { MessageHandler } from "./classes/chat";
 
 const app = express();
 const port = 8080;
 
-const server = http.createServer(app);
 
+const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 wss.on("connection", (ws: WebSocket) => {
   console.log("New client connected");
 
-  ws.on("message", (data: string) => {
-    const message = data.toString();
-    console.log("Received:", message);
+  ws.on("message", async (data: string) => {
+    try {
+      const parsedData = JSON.parse(data.toString());
 
-    ws.send(`Server received: ${message}`);
+      const { content, userId, roomId } = parsedData;
+
+      const messageHandler = new MessageHandler(content, ws, userId, roomId);
+
+      await messageHandler.save();
+
+      console.log("Message processed:", content);
+
+      ws.send(JSON.stringify({ status: "sent", content }));
+    } catch (e) {
+      console.error("Error processing message:", e);
+      ws.send(JSON.stringify({ error: "Invalid message format" }));
+    }
   });
 
   ws.on("close", () => {

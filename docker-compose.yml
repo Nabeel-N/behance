@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: my_real_pass
       POSTGRES_DB: behance_clone_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - behance_postgres_data:/var/lib/postgresql/data
 

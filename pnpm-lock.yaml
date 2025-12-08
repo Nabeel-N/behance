@@ -127,6 +127,9 @@ importers:
 
   apps/ws-backend:
     dependencies:
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       express:
         specifier: ^4.21.2
         version: 4.21.2
@@ -134,6 +137,9 @@ importers:
         specifier: ^8.18.3
         version: 8.18.3
     devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       '@types/express':
         specifier: ^4.17.25
         version: 4.17.25

@@ -5,6 +5,7 @@ import * as jwt from "jsonwebtoken";
 import { prisma, User } from "@repo/db";
 import { middleware } from "./middleware";
 
+
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -670,6 +671,9 @@ app.get("/api/users", middleware, async (req, res) => {
     console.error("Error searching users:", e);
     return res.status(500).json({ message: "Error searching users" });
   }
+});
+app.post("/api/create-room", middleware, async (req, res) => {
+  
 });
 
 app.listen(port, () => {

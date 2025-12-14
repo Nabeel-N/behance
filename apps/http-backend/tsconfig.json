@@ -10,7 +10,7 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src"],
+  "include": ["src", "../ws-backend/src/index.ts"],
   "exclude": ["node_modules", "dist"],
   "files": ["src/index.ts", "src/middleware.ts", "src/types/express.d.ts"]
 }

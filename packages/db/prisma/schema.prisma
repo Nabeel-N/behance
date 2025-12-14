@@ -77,11 +77,8 @@ model Message {
   id        Int      @id @default(autoincrement())
   text      String
   createdAt DateTime @default(now())
-
-
   senderId  Int
   sender    User     @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
-
   roomId    Int
   room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
   

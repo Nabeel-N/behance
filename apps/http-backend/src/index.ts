@@ -672,9 +672,7 @@ app.get("/api/users", middleware, async (req, res) => {
     return res.status(500).json({ message: "Error searching users" });
   }
 });
-app.post("/api/create-room", middleware, async (req, res) => {
-  
-});
+
 
 app.listen(port, () => {
   console.log(`🚀 http-backend listening at http://localhost:${port}`);

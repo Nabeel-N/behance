@@ -9,6 +9,10 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src", "../../apps/ws-backend/src/chat"],
+  "include": [
+    "src",
+    "../../apps/ws-backend/src/chat",
+    "../../apps/ws-backend/src/Chat.Service.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

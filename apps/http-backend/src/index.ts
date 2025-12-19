@@ -5,7 +5,6 @@ import * as jwt from "jsonwebtoken";
 import { prisma, User } from "@repo/db";
 import { middleware } from "./middleware";
 
-
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -673,6 +672,26 @@ app.get("/api/users", middleware, async (req, res) => {
   }
 });
 
+app.post("/api/create-room", middleware, async (req, res) => {
+  const { receiverId } = req.body;
+  const userId = (req as any).user?.id;
+
+  const room = await prisma.chatRoom.create({
+    data: {
+      users: { connect: [{ id: userId }, { id: receiverId }] },
+    },
+  });
+
+  res.json({
+    roomId: room.id,
+  });
+});
+
+function Sum(a: number, b: number) {
+  return a + b;
+}
+
+let ans = Sum(10, 20);
 
 app.listen(port, () => {
   console.log(`🚀 http-backend listening at http://localhost:${port}`);
